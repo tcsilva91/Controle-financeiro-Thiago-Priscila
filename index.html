@@ -290,15 +290,11 @@
     <span>💍 Controle Financeiro</span>
   </div>
   <nav class="sidebar-nav">
-    <button class="nav-item active" onclick="showTab('dashboard',this)"><span class="icon">📊</span> Dashboard</button>
-    <button class="nav-item" onclick="showTab('saldos',this)"><span class="icon">🏦</span> Saldos</button>
+    <button class="nav-item active" onclick="showTab('saldos',this)"><span class="icon">🏦</span> Saldos</button>
     <button class="nav-item" onclick="showTab('casamento',this)"><span class="icon">💍</span> Casamento</button>
     <button class="nav-item" onclick="showTab('lua-de-mel',this)"><span class="icon">✈️</span> Lua de Mel</button>
-    <button class="nav-item" onclick="showTab('parcelas',this)"><span class="icon">📅</span> Parcelas</button>
     <button class="nav-item" onclick="showTab('cartoes',this)"><span class="icon">💳</span> Cartões</button>
-    <button class="nav-item" onclick="showTab('receitas',this)"><span class="icon">📈</span> Receitas</button>
     <button class="nav-item" onclick="showTab('acoes',this)"><span class="icon">✅</span> Ações</button>
-    <button class="nav-item" onclick="showTab('previsao',this)"><span class="icon">🔮</span> Previsão</button>
   </nav>
   <div class="sidebar-footer">
     <div class="sync-info">Dados salvos localmente<br>Exporte para sincronizar</div>
@@ -320,69 +316,8 @@
 
   <div class="content">
 
-    <!-- DASHBOARD -->
-    <div class="tab-pane active" id="tab-dashboard">
-      <div class="page-header">
-        <h2 class="section-title">Resumo Geral</h2>
-        <p>Casamento 12/09/2026 · Lua de Mel Itália Set/2026 · Passe o mouse nos cards para detalhes</p>
-      </div>
-      <!-- Executive Cards -->
-      <div class="exec-cards-grid" id="exec-cards"></div>
-      <!-- Alerts -->
-      <div class="alerts-grid" id="dash-alerts"></div>
-      <!-- Charts row -->
-      <div class="two-col" style="margin-bottom:20px">
-        <div class="donut-wrap" id="donut-wrap"></div>
-        <div class="catbar-wrap" id="catbar-wrap"></div>
-      </div>
-      <!-- Ranking + Distributions row -->
-      <div class="two-col" style="margin-bottom:20px">
-        <div>
-          <div class="table-wrap" style="padding:20px">
-            <div class="catbar-title">🏆 Maiores despesas</div>
-            <div id="ranking-wrap"></div>
-          </div>
-        </div>
-        <div>
-          <div class="table-wrap" style="padding:20px;margin-bottom:16px">
-            <div class="catbar-title">👤 Por responsável</div>
-            <div id="dist-resp-wrap"></div>
-          </div>
-          <div class="table-wrap" style="padding:20px">
-            <div class="catbar-title">💳 Por cartão</div>
-            <div id="dist-cart-wrap"></div>
-          </div>
-        </div>
-      </div>
-      <!-- Progress + mini chart -->
-      <div class="two-col">
-        <div>
-          <div class="progress-wrap">
-            <div class="progress-header"><span class="progress-title">💍 Casamento</span><span class="progress-pct" id="prog-cas-pct">–</span></div>
-            <div class="progress-bar"><div class="progress-fill" id="prog-cas" style="width:0%"></div></div>
-            <div class="progress-labels" id="prog-cas-labels"></div>
-          </div>
-          <div class="progress-wrap">
-            <div class="progress-header"><span class="progress-title">✈️ Lua de Mel</span><span class="progress-pct" id="prog-lua-pct">–</span></div>
-            <div class="progress-bar"><div class="progress-fill amber" id="prog-lua" style="width:0%"></div></div>
-            <div class="progress-labels" id="prog-lua-labels"></div>
-          </div>
-        </div>
-        <div class="card" style="padding:20px">
-          <div class="card-label">Impacto nos próximos 6 meses (parcelas)</div>
-          <div class="mini-chart" id="mini-chart"></div>
-        </div>
-      </div>
-      <!-- Próximas parcelas -->
-      <div class="table-wrap" style="margin-top:20px">
-        <div class="table-header"><span class="table-header-title">Próximas parcelas (30 dias)</span></div>
-        <table><thead><tr><th>Item</th><th>Origem</th><th>Vencimento</th><th>Valor</th><th>Cartão</th><th>Status</th></tr></thead>
-        <tbody id="proximas-body"></tbody></table>
-      </div>
-    </div>
-
     <!-- SALDOS -->
-    <div class="tab-pane" id="tab-saldos">
+    <div class="tab-pane active" id="tab-saldos">
       <div class="page-header">
         <h2 class="section-title">🏦 Saldos das Contas</h2>
         <p>Edite manualmente os saldos. Vincule transações para atualização automática futuramente.</p>
@@ -446,58 +381,67 @@
       </div>
     </div>
 
-    <!-- PARCELAS -->
-    <div class="tab-pane" id="tab-parcelas">
-      <div class="page-header"><h2 class="section-title">📅 Parcelas</h2><p>Impacto mensal real no fluxo de caixa</p></div>
-      <div class="table-wrap section-gap">
-        <div class="table-header">
-          <span class="table-header-title">Todas as parcelas</span>
-          <div class="table-filters">
-            <select class="filter-select" id="par-filter-mes" onchange="renderParcelas()"><option value="">Mês</option></select>
-            <select class="filter-select" id="par-filter-origem" onchange="renderParcelas()"><option value="">Origem</option><option>casamento</option><option>lua de mel</option><option>casa</option><option>outros</option></select>
-            <select class="filter-select" id="par-filter-status" onchange="renderParcelas()"><option value="">Status</option><option>aberta</option><option>paga</option><option>atrasada</option></select>
-            <button class="btn btn-primary btn-sm" onclick="openModal('parcela')">+ Adicionar</button>
-          </div>
-        </div>
-        <div style="overflow-x:auto">
-          <table><thead><tr><th>Origem</th><th>Item</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Competência</th><th>Cartão</th><th>Status</th><th></th></tr></thead>
-          <tbody id="par-body"></tbody>
-          <tfoot><tr class="totals-row" id="par-totals"></tr></tfoot></table>
-        </div>
-      </div>
-    </div>
-
-    <!-- CARTÕES -->
+    <!-- CARTÕES (unificado com Previsão) -->
     <div class="tab-pane" id="tab-cartoes">
-      <div class="page-header"><h2 class="section-title">💳 Cartões e Contas</h2></div>
+      <div class="page-header"><h2 class="section-title">💳 Cartões &amp; Previsão de Faturas</h2></div>
 
-      <!-- Filtros -->
-      <div class="table-wrap section-gap">
-        <div class="table-header">
-          <span class="table-header-title">Filtros</span>
-          <div class="table-filters">
-            <select class="filter-select" id="cart-filter-nome" onchange="renderCartoes()">
-              <option value="">Todos os cartões</option>
-            </select>
-            <select class="filter-select" id="cart-filter-mes" onchange="renderCartoes()">
-              <option value="">Todos os meses</option>
-            </select>
-            <select class="filter-select" id="cart-filter-tipo" onchange="renderCartoes()">
-              <option value="">À vista e parcelado</option>
-              <option value="avista">À vista</option>
-              <option value="parcelado">Parcelado</option>
-            </select>
-            <button class="btn btn-primary btn-sm" onclick="openModal('cartao')">+ Novo cartão</button>
-            <button class="btn btn-outline btn-sm" onclick="openModalCompra()">+ Lançar compra</button>
-            <label class="btn btn-outline btn-sm" style="cursor:pointer" title="Importar CSV Nubank">📥 CSV <input type="file" accept=".csv" style="display:none" onchange="importCSV(event)"></label>
-          </div>
+      <!-- Filtros principais -->
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
+        <select class="filter-select" id="cart-filter-nome" onchange="renderCartoes()" style="font-size:.85rem;padding:8px 14px">
+          <option value="">Todos os cartões</option>
+        </select>
+        <select class="filter-select" id="cart-filter-mes" onchange="renderCartoes()" style="font-size:.85rem;padding:8px 14px">
+          <option value="">Todos os meses</option>
+        </select>
+        <select class="filter-select" id="cart-filter-tipo" onchange="renderCartoes()" style="font-size:.85rem;padding:8px 14px">
+          <option value="">À vista e parcelado</option>
+          <option value="avista">Somente à vista</option>
+          <option value="parcelado">Somente parcelado</option>
+        </select>
+        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="openModal('cartao')">+ Cartão</button>
+          <button class="btn btn-outline btn-sm" onclick="openModalCompra()">+ Lançar compra</button>
+          <label class="btn btn-outline btn-sm" style="cursor:pointer" title="Importar CSV Nubank">📥 CSV <input type="file" accept=".csv" style="display:none" onchange="importCSV(event)"></label>
         </div>
       </div>
+
+      <!-- Gráfico de barras por mês -->
+      <div class="table-wrap section-gap" id="cart-chart-wrap"></div>
 
       <!-- Painel do cartão selecionado -->
       <div id="cart-painel"></div>
 
-      <!-- Tabela de faturas por mês -->
+      <!-- Previsão de parcelas abertas — grade mês × cartão -->
+      <div class="table-wrap section-gap">
+        <div class="table-header">
+          <span class="table-header-title">🔮 Previsão de parcelas por cartão</span>
+          <select class="filter-select" id="prev-filter-ano" onchange="renderCartoes()">
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="prev-grade-table">
+            <thead id="prev-grade-head"></thead>
+            <tbody id="prev-grade-body"></tbody>
+            <tfoot id="prev-grade-foot"></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Detalhe ao clicar numa célula da grade -->
+      <div class="table-wrap" id="prev-detalhe-wrap" style="margin-top:20px;display:none">
+        <div class="table-header">
+          <span class="table-header-title" id="prev-detalhe-titulo">Detalhe</span>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('prev-detalhe-wrap').style.display='none'">✕ Fechar</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table><thead><tr><th>Item</th><th>Parcela</th><th>Vencimento</th><th>Valor</th></tr></thead>
+          <tbody id="prev-detalhe-body"></tbody></table>
+        </div>
+      </div>
+
+      <!-- Faturas por mês (lançamentos) -->
       <div id="cart-faturas-wrap"></div>
 
       <!-- Cartões cadastrados -->
@@ -506,21 +450,6 @@
         <div style="overflow-x:auto">
           <table><thead><tr><th>Cartão</th><th>Titular</th><th>Fechamento</th><th>Vencimento</th><th>Limite</th><th>Obs</th><th></th></tr></thead>
           <tbody id="cart-body"></tbody></table>
-        </div>
-      </div>
-    </div>
-
-    <!-- RECEITAS -->
-    <div class="tab-pane" id="tab-receitas">
-      <div class="page-header"><h2 class="section-title">📈 Receitas e Fluxo Mensal</h2></div>
-      <div class="alert alert-amber"><span>⚠️</span><div><strong>Agosto/2026 — mês crítico:</strong> R$ 30.212 em parcelas finais do casamento (buffet, local, banda). Toda a lua de mel deve estar quitada antes de agosto.</div></div>
-      <div class="table-wrap section-gap">
-        <div class="table-header"><span class="table-header-title">Fluxo mensal 2026</span><button class="btn btn-primary btn-sm" onclick="openModal('receita')">+ Mês</button></div>
-        <div style="overflow-x:auto">
-          <table class="fluxo-table">
-            <thead><tr><th>Mês</th><th>Receita Total</th><th>Parc. Casamento</th><th>Parc. Lua de Mel</th><th>Desp. Fixas</th><th>Outros</th><th>Total Despesas</th><th>Saldo Est.</th><th></th></tr></thead>
-            <tbody id="rec-body"></tbody>
-          </table>
         </div>
       </div>
     </div>
@@ -542,53 +471,6 @@
         <div style="overflow-x:auto">
           <table><thead><tr><th>Descrição</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Status</th><th>Obs</th><th></th></tr></thead>
           <tbody id="acoes-body"></tbody></table>
-        </div>
-      </div>
-    </div>
-
-    <!-- PREVISÃO FATURAS -->
-    <div class="tab-pane" id="tab-previsao">
-      <div class="page-header"><h2 class="section-title">🔮 Previsão de Faturas</h2><p>Projeção dos próximos meses com base nas compras parceladas já lançadas</p></div>
-      <div class="cards-grid" id="prev-cards"></div>
-
-      <!-- Grade mês × cartão -->
-      <div class="table-wrap section-gap">
-        <div class="table-header">
-          <span class="table-header-title">Faturas por cartão — visão mensal</span>
-          <div class="table-filters">
-            <select class="filter-select" id="prev-filter-ano" onchange="renderPrevisao()">
-              <option value="2026">2026</option>
-              <option value="2027">2027</option>
-            </select>
-          </div>
-        </div>
-        <div style="overflow-x:auto">
-          <table id="prev-grade-table">
-            <thead id="prev-grade-head"></thead>
-            <tbody id="prev-grade-body"></tbody>
-            <tfoot id="prev-grade-foot"></tfoot>
-          </table>
-        </div>
-      </div>
-
-      <!-- Detalhe ao clicar numa célula -->
-      <div class="table-wrap" id="prev-detalhe-wrap" style="margin-top:20px;display:none">
-        <div class="table-header">
-          <span class="table-header-title" id="prev-detalhe-titulo">Detalhe</span>
-          <button class="btn btn-outline btn-sm" onclick="document.getElementById('prev-detalhe-wrap').style.display='none'">✕ Fechar</button>
-        </div>
-        <div style="overflow-x:auto">
-          <table><thead><tr><th>Item</th><th>Parcela</th><th>Vencimento</th><th>Valor</th></tr></thead>
-          <tbody id="prev-detalhe-body"></tbody></table>
-        </div>
-      </div>
-
-      <!-- Detalhe completo de todas as parcelas -->
-      <div class="table-wrap" style="margin-top:20px">
-        <div class="table-header"><span class="table-header-title">Todas as parcelas abertas</span></div>
-        <div style="overflow-x:auto">
-          <table><thead><tr><th>Item</th><th>Origem</th><th>Parcela</th><th>Competência</th><th>Vencimento</th><th>Valor</th><th>Cartão</th></tr></thead>
-          <tbody id="prev-detail-body"></tbody></table>
         </div>
       </div>
     </div>
@@ -977,7 +859,7 @@ function statusBadge(s){
 // ============================================================
 //  NAVIGATION
 // ============================================================
-const tabTitles={dashboard:'Dashboard',saldos:'🏦 Saldos',casamento:'💍 Casamento','lua-de-mel':'✈️ Lua de Mel',parcelas:'📅 Parcelas',cartoes:'💳 Cartões',receitas:'📈 Receitas',acoes:'✅ Ações',previsao:'🔮 Previsão de Faturas'};
+const tabTitles={saldos:'🏦 Saldos',casamento:'💍 Casamento','lua-de-mel':'✈️ Lua de Mel',cartoes:'💳 Cartões & Previsão',acoes:'✅ Ações'};
 
 function showTab(id, btn){
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
@@ -990,15 +872,11 @@ function showTab(id, btn){
 }
 
 function renderTab(id){
-  if(id==='dashboard') renderDashboard();
-  else if(id==='saldos') renderSaldos();
+  if(id==='saldos') renderSaldos();
   else if(id==='casamento') renderCasamento();
   else if(id==='lua-de-mel') renderLua();
-  else if(id==='parcelas') renderParcelas();
   else if(id==='cartoes') renderCartoes();
-  else if(id==='receitas') renderReceitas();
   else if(id==='acoes') renderAcoes();
-  else if(id==='previsao') renderPrevisao();
 }
 
 // ============================================================
@@ -1380,6 +1258,19 @@ function catSelectHtml(val,rowId){
   return `<select onchange="updateCompraCategoria('${rowId}',this.value)">${opts}</select>`;
 }
 
+function fmtMes(ym){if(!ym||ym==='–')return'–';const[y,m]=ym.split('-');const n=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];return(n[parseInt(m)-1]||m)+'/'+y.slice(2);}
+
+function prevDetalhe(mes,cart){
+  const parcelas=db.parcelas.filter(p=>p.comp===mes&&p.cartao===cart&&p.status==='aberta');
+  document.getElementById('prev-detalhe-titulo').textContent=`Detalhe: ${cart} — ${fmtMes(mes)}`;
+  document.getElementById('prev-detalhe-body').innerHTML=parcelas.map(p=>`<tr>
+    <td><strong>${p.item}</strong></td><td>${p.num}</td><td>${fmtDate(p.venc)}</td><td><strong>${fmt(p.valor)}</strong></td>
+  </tr>`).join('')||`<tr><td colspan="4" class="table-empty">–</td></tr>`;
+  const wrap=document.getElementById('prev-detalhe-wrap');
+  wrap.style.display='block';
+  wrap.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
 function renderCartoes(){
   const cartSel=document.getElementById('cart-filter-nome');
   const mesSel=document.getElementById('cart-filter-mes');
@@ -1392,7 +1283,58 @@ function renderCartoes(){
   const allMonths=[...new Set(db.compras.map(c=>c.comp))].sort();
   if(mesSel&&mesSel.options.length<=1) allMonths.forEach(m=>{const o=document.createElement('option');o.value=m;o.text=m;mesSel.appendChild(o);});
 
-  // Painel cartão
+  // ── Gráfico de barras por mês ──
+  const CART_BAR_COLORS={};
+  const PALETTE=['#2563eb','#f97316','#16a34a','#7c3aed','#0891b2','#dc2626'];
+  db.cartoes.forEach((c,i)=>CART_BAR_COLORS[c.nome]=PALETTE[i%PALETTE.length]);
+
+  const chartMonths=allMonths.slice(-12); // últimos 12 meses com dados
+  const cartsForChart=nomeF?[nomeF]:db.cartoes.map(c=>c.nome);
+
+  // Para cada mês: total à vista e total parcelado (por cartão se filtrado)
+  const chartData=chartMonths.map(m=>{
+    let comprasM=db.compras.filter(c=>c.comp===m);
+    if(nomeF) comprasM=comprasM.filter(c=>c.cartao===nomeF);
+    const avista=comprasM.filter(c=>c.npar<=1).reduce((a,c)=>a+c.valor,0);
+    const parc=comprasM.filter(c=>c.npar>1).reduce((a,c)=>a+c.valor,0);
+    return {mes:m,avista,parc,total:avista+parc};
+  });
+  const maxBar=Math.max(...chartData.map(d=>d.total),1);
+  const todayYM=new Date().toISOString().slice(0,7);
+
+  const barsHtml=chartData.map(d=>{
+    const hTotal=Math.max(Math.round((d.total/maxBar)*110),d.total>0?4:0);
+    const hParc=d.total>0?Math.round((d.parc/d.total)*hTotal):0;
+    const hVista=hTotal-hParc;
+    const isCur=d.mes===todayYM;
+    const label=fmtMes(d.mes);
+    return `<div class="chart-bar-col" style="min-width:48px;flex:1;cursor:pointer" onclick="document.getElementById('cart-filter-mes').value='${d.mes}';renderCartoes()" title="${d.mes}: ${fmt(d.total)}">
+      <div style="font-size:.64rem;color:var(--slate);text-align:center;white-space:nowrap;margin-bottom:2px">${d.total>0?fmt(d.total):''}</div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:110px;width:100%">
+        ${d.total>0?`
+        <div style="width:70%;border-radius:4px 4px 0 0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+          <div style="height:${hParc}px;background:#f97316;width:100%" title="Parcelado: ${fmt(d.parc)}"></div>
+          <div style="height:${hVista}px;background:#2563eb;width:100%" title="À vista: ${fmt(d.avista)}"></div>
+        </div>`:'<div style="width:70%;height:4px;background:var(--border);border-radius:99px"></div>'}
+      </div>
+      <div style="font-size:.68rem;color:${isCur?'var(--blue)':'var(--slate-light)'};font-weight:${isCur?700:400};text-align:center;margin-top:4px;white-space:nowrap">${label}${isCur?' ◀':''}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('cart-chart-wrap').innerHTML=`
+    <div style="padding:20px 24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:.875rem;font-weight:600;color:var(--text)">Total lançado por mês ${nomeF?'— '+nomeF:''}</div>
+        <div style="display:flex;gap:14px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--slate)"><div style="width:12px;height:12px;border-radius:3px;background:#2563eb"></div>À vista</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--slate)"><div style="width:12px;height:12px;border-radius:3px;background:#f97316"></div>Parcelado</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:150px;overflow-x:auto;padding-bottom:4px">${barsHtml||'<div style="color:var(--slate-light);font-size:.875rem">Nenhum lançamento</div>'}</div>
+      <div style="font-size:.7rem;color:var(--slate-light);margin-top:8px">Clique em uma barra para filtrar o mês</div>
+    </div>`;
+
+  // ── Painel cartão ──
   const painelEl=document.getElementById('cart-painel');
   if(nomeF){
     const ci=db.cartoes.find(c=>c.nome===nomeF)||{};
@@ -1473,6 +1415,72 @@ function renderCartoes(){
     <td>${c.limite?fmt(c.limite):'–'}</td><td>${c.obs||'–'}</td>
     <td><span class="edit-icon" onclick="editCartao(${c.id})">✏️</span></td></tr>`
   ).join('')||`<tr><td colspan="7" class="table-empty">Nenhum cartão</td></tr>`;
+
+  // ── Grade previsão mês × cartão ──
+  const anoSel=document.getElementById('prev-filter-ano')?.value||'2026';
+  const allOpen=db.parcelas.filter(p=>p.status==='aberta'&&p.comp.startsWith(anoSel));
+  const MESES_ANO=Array.from({length:12},(_,i)=>`${anoSel}-${String(i+1).padStart(2,'0')}`);
+  const CART_COLORS_PREV={'Nubank':'#8b5cf6','Itaú Thiago':'#f97316','Itaú':'#f97316'};
+  function cartColorPrev(nome){for(const [k,v] of Object.entries(CART_COLORS_PREV)) if(nome&&nome.includes(k)) return v; return '#64748b';}
+
+  const byMesPrev={};
+  MESES_ANO.forEach(m=>{byMesPrev[m]={};});
+  allOpen.forEach(p=>{
+    const k=p.cartao||'–';
+    if(!byMesPrev[p.comp]) return;
+    if(!byMesPrev[p.comp][k]) byMesPrev[p.comp][k]={total:0,items:[]};
+    byMesPrev[p.comp][k].total+=p.valor;
+    byMesPrev[p.comp][k].items.push(p);
+  });
+
+  const cartsUniqPrev=[...new Set(allOpen.map(p=>p.cartao).filter(Boolean))].sort();
+  const totalPorMesPrev=MESES_ANO.map(m=>Object.values(byMesPrev[m]).reduce((a,v)=>a+v.total,0));
+  const maxTotalPrev=Math.max(...totalPorMesPrev,1);
+
+  const headHtml=`<tr>
+    <th style="min-width:150px">Cartão</th>
+    ${MESES_ANO.map(m=>{
+      const isCur=m===todayYM;const isPast=m<todayYM;
+      return `<th style="text-align:center;${isCur?'background:var(--blue-pale);':''}${isPast?'color:var(--slate-light);':''}">${fmtMes(m)}</th>`;
+    }).join('')}
+    <th style="text-align:right">Total</th>
+  </tr>`;
+
+  const cartRowsPrev=cartsUniqPrev.map(cart=>{
+    const cor=cartColorPrev(cart);
+    const totalCart=MESES_ANO.reduce((a,m)=>(byMesPrev[m][cart]?.total||0)+a,0);
+    const cells=MESES_ANO.map(m=>{
+      const v=byMesPrev[m][cart];
+      const isPast=m<todayYM;const isCur=m===todayYM;
+      if(!v||v.total===0) return `<td style="text-align:center;color:var(--border)">—</td>`;
+      return `<td style="text-align:center;background:${isCur?'var(--blue-pale)':''};cursor:pointer" onclick="prevDetalhe('${m}','${cart.replace(/'/g,"\\'")}')">
+        <div style="display:inline-block;border:1.5px solid ${cor};border-radius:6px;padding:4px 8px;min-width:64px;background:${cor}18">
+          <div style="font-size:.78rem;font-weight:700;color:${cor}">${fmt(v.total)}</div>
+          <div style="font-size:.65rem;color:var(--slate)">${v.items.length} parc.</div>
+        </div>
+      </td>`;
+    }).join('');
+    return `<tr><td><span style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${cor};flex-shrink:0"></span><strong style="font-size:.82rem">${cart}</strong></span></td>${cells}<td style="text-align:right;font-weight:700">${totalCart>0?fmt(totalCart):'—'}</td></tr>`;
+  }).join('');
+
+  const totalRowPrev=`<tr style="background:var(--surface2);border-top:2px solid var(--border)">
+    <td><strong style="font-size:.8rem">TOTAL MÊS</strong></td>
+    ${MESES_ANO.map((m,i)=>{
+      const v=totalPorMesPrev[i];const isCur=m===todayYM;
+      if(v===0) return `<td style="text-align:center;color:var(--slate-light)">—</td>`;
+      const col=v>10000?'var(--red)':v>5000?'var(--amber)':'var(--green)';
+      const pct=Math.round(v/maxTotalPrev*100);
+      return `<td style="text-align:center;background:${isCur?'var(--blue-pale)':''}">
+        <div style="font-size:.78rem;font-weight:700;color:${col}">${fmt(v)}</div>
+        <div style="height:4px;background:var(--border);border-radius:99px;margin-top:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${col};border-radius:99px"></div></div>
+      </td>`;
+    }).join('')}
+    <td style="text-align:right;font-weight:700">${fmt(totalPorMesPrev.reduce((a,v)=>a+v,0))}</td>
+  </tr>`;
+
+  document.getElementById('prev-grade-head').innerHTML=headHtml;
+  document.getElementById('prev-grade-body').innerHTML=cartRowsPrev||`<tr><td colspan="14" class="table-empty">Nenhuma parcela aberta em ${anoSel}</td></tr>`;
+  document.getElementById('prev-grade-foot').innerHTML=totalRowPrev;
 }
 
 function toggleFatura(mid){
@@ -1756,7 +1764,7 @@ function exportData(){
 function importData(event){
   const file=event.target.files[0];if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{try{const imp=JSON.parse(e.target.result);if(imp.casamento&&imp.lua){if(!imp.compras)imp.compras=[];if(!imp.acoes)imp.acoes=[];db=imp;saveData();renderDashboard();alert('✅ Dados importados com sucesso!');}else alert('❌ Arquivo inválido.');}catch{alert('❌ Erro ao ler.');}};
+  reader.onload=e=>{try{const imp=JSON.parse(e.target.result);if(imp.casamento&&imp.lua){if(!imp.compras)imp.compras=[];if(!imp.acoes)imp.acoes=[];db=imp;saveData();renderSaldos();alert('✅ Dados importados com sucesso!');}else alert('❌ Arquivo inválido.');}catch{alert('❌ Erro ao ler.');}};
   reader.readAsText(file);event.target.value='';
 }
 
@@ -1819,145 +1827,8 @@ function deleteAcao(){
   saveData();closeModal('acao');renderAcoes();
 }
 
-// ============================================================
-//  PREVISÃO DE FATURAS — grade mês × cartão
-// ============================================================
-const CART_COLORS_PREV={
-  'Nubank Thiago':'#8b5cf6',
-  'Nubank Thiago (Black)':'#8b5cf6',
-  'Itaú Thiago':'#f97316',
-};
-function cartColor(nome){
-  for(const [k,v] of Object.entries(CART_COLORS_PREV)) if(nome&&nome.includes(k.replace(' (Black)',''))) return v;
-  return '#64748b';
-}
-function fmtMes(ym){
-  const [y,m]=ym.split('-');
-  const nomes=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  return nomes[parseInt(m)-1]+'/'+y.slice(2);
-}
-function renderPrevisao(){
-  const anoSel=document.getElementById('prev-filter-ano')?.value||'2026';
-  const todayYM=new Date().toISOString().slice(0,7);
-
-  // Todas as parcelas abertas do ano selecionado
-  const allOpen=db.parcelas.filter(p=>p.status==='aberta'&&p.comp.startsWith(anoSel));
-  // Para cards de resumo, todas as abertas de hoje em diante
-  const abertas=db.parcelas.filter(p=>p.status==='aberta'&&p.comp>=todayYM);
-  const totalGeral=abertas.reduce((a,p)=>a+p.valor,0);
-  const mesesAbertos=[...new Set(abertas.map(p=>p.comp))].sort();
-  const proxMes=mesesAbertos[0]||'–';
-  const proxTotal=proxMes!=='–'?abertas.filter(p=>p.comp===proxMes).reduce((a,p)=>a+p.valor,0):0;
-
-  document.getElementById('prev-cards').innerHTML=[
-    {label:'Total parcelado aberto',value:fmt(totalGeral),cls:'card-red'},
-    {label:'Próximo mês ('+fmtMes(proxMes)+')',value:fmt(proxTotal),cls:'card-amber'},
-    {label:'Meses com parcelas',value:mesesAbertos.length,cls:'card-blue'},
-    {label:'Parcelas abertas',value:abertas.length,cls:''},
-  ].map(c=>`<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value">${c.value}</div></div>`).join('');
-
-  // Cartões presentes no ano
-  const cartsUniq=[...new Set(allOpen.map(p=>p.cartao).filter(Boolean))].sort();
-  // Meses do ano
-  const MESES_ANO=Array.from({length:12},(_,i)=>`${anoSel}-${String(i+1).padStart(2,'0')}`);
-
-  // byMes[comp][cartao] = {total, parcelas[]}
-  const byMes={};
-  MESES_ANO.forEach(m=>{byMes[m]={};});
-  allOpen.forEach(p=>{
-    const k=p.cartao||'–';
-    if(!byMes[p.comp][k]) byMes[p.comp][k]={total:0,items:[]};
-    byMes[p.comp][k].total+=p.valor;
-    byMes[p.comp][k].items.push(p);
-  });
-
-  // Total por mês (linha de totais)
-  const totalPorMes=MESES_ANO.map(m=>Object.values(byMes[m]).reduce((a,v)=>a+v.total,0));
-  const maxTotal=Math.max(...totalPorMes,1);
-
-  // Cabeçalho: Cartão | Jan | Fev | ... | Dez | Total
-  const headHtml=`<tr>
-    <th style="min-width:150px">Cartão</th>
-    ${MESES_ANO.map(m=>{
-      const isPast=m<todayYM;
-      const isCur=m===todayYM;
-      return `<th style="text-align:center;${isCur?'background:var(--blue-pale);':''}${isPast?'color:var(--slate-light);':''}">${fmtMes(m)}</th>`;
-    }).join('')}
-    <th style="text-align:right">Total</th>
-  </tr>`;
-
-  // Linha por cartão
-  const cartRows=cartsUniq.map(cart=>{
-    const cor=cartColor(cart);
-    const totalCart=MESES_ANO.reduce((a,m)=>(byMes[m][cart]?.total||0)+a,0);
-    const cells=MESES_ANO.map(m=>{
-      const v=byMes[m][cart];
-      const isPast=m<todayYM;
-      const isCur=m===todayYM;
-      if(!v||v.total===0) return `<td style="text-align:center;color:var(--border);${isPast?'opacity:.4':''}">—</td>`;
-      const bg=isCur?'var(--blue-pale)':'';
-      const intensity=Math.round(30+70*(v.total/maxTotal));
-      return `<td style="text-align:center;background:${bg};cursor:pointer" onclick="prevDetalhe('${m}','${cart.replace(/'/g,"\\'")}')">
-        <div style="display:inline-block;background:${cor}${Math.round(intensity*0.4).toString(16).padStart(2,'0')};border:1.5px solid ${cor};border-radius:6px;padding:4px 8px;min-width:64px">
-          <div style="font-size:.78rem;font-weight:700;color:${cor}">${fmt(v.total)}</div>
-          <div style="font-size:.65rem;color:var(--slate)">${v.items.length} parc.</div>
-        </div>
-      </td>`;
-    }).join('');
-    return `<tr>
-      <td><span style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${cor};flex-shrink:0"></span><strong style="font-size:.82rem">${cart}</strong></span></td>
-      ${cells}
-      <td style="text-align:right;font-weight:700;color:var(--text)">${totalCart>0?fmt(totalCart):'—'}</td>
-    </tr>`;
-  }).join('');
-
-  // Linha de total mensal (barra de calor)
-  const totalRow=`<tr style="background:var(--surface2);border-top:2px solid var(--border)">
-    <td><strong style="font-size:.8rem">TOTAL MÊS</strong></td>
-    ${MESES_ANO.map((m,i)=>{
-      const v=totalPorMes[i];
-      const isPast=m<todayYM;
-      const isCur=m===todayYM;
-      const pct=Math.round(v/maxTotal*100);
-      if(v===0) return `<td style="text-align:center;color:var(--slate-light)">—</td>`;
-      const col=v>10000?'var(--red)':v>5000?'var(--amber)':'var(--green)';
-      return `<td style="text-align:center;${isCur?'background:var(--blue-pale);':''}">
-        <div style="font-size:.78rem;font-weight:700;color:${col}">${fmt(v)}</div>
-        <div style="height:4px;background:var(--border);border-radius:99px;margin-top:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${col};border-radius:99px"></div></div>
-      </td>`;
-    }).join('')}
-    <td style="text-align:right;font-weight:700">${fmt(totalPorMes.reduce((a,v)=>a+v,0))}</td>
-  </tr>`;
-
-  document.getElementById('prev-grade-head').innerHTML=headHtml;
-  document.getElementById('prev-grade-body').innerHTML=cartRows||`<tr><td colspan="${14}" class="table-empty">Nenhuma parcela no ano ${anoSel}</td></tr>`;
-  document.getElementById('prev-grade-foot').innerHTML=totalRow;
-
-  // Tabela detalhe completa
-  const detail=[...abertas].sort((a,b)=>a.comp.localeCompare(b.comp)||a.venc.localeCompare(b.venc));
-  document.getElementById('prev-detail-body').innerHTML=detail.map(p=>`<tr>
-    <td><strong>${p.item}</strong></td><td><span class="badge badge-gray">${p.origem}</span></td>
-    <td>${p.num}</td><td>${p.comp}</td><td>${fmtDate(p.venc)}</td>
-    <td><strong>${fmt(p.valor)}</strong></td><td>${p.cartao||'–'}</td></tr>`
-  ).join('')||`<tr><td colspan="7" class="table-empty">Nenhuma parcela</td></tr>`;
-}
-
-function prevDetalhe(mes, cart){
-  const parcelas=db.parcelas.filter(p=>p.comp===mes&&p.cartao===cart&&p.status==='aberta');
-  document.getElementById('prev-detalhe-titulo').textContent=`Detalhe: ${cart} — ${fmtMes(mes)}`;
-  document.getElementById('prev-detalhe-body').innerHTML=parcelas.map(p=>`<tr>
-    <td><strong>${p.item}</strong></td>
-    <td>${p.num}</td>
-    <td>${fmtDate(p.venc)}</td>
-    <td><strong>${fmt(p.valor)}</strong></td>
-  </tr>`).join('')||`<tr><td colspan="4" class="table-empty">–</td></tr>`;
-  const wrap=document.getElementById('prev-detalhe-wrap');
-  wrap.style.display='block';
-  wrap.scrollIntoView({behavior:'smooth',block:'start'});
-}
-
 // INIT
-renderDashboard();
+renderSaldos();
 </script>
 </body>
 </html>
