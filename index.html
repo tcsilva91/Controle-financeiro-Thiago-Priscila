@@ -447,7 +447,7 @@
         <select class="filter-select" id="cart-filter-nome" onchange="renderCartoes()" style="font-size:.85rem;padding:8px 14px">
           <option value="">Todos os cartões</option>
         </select>
-        <select class="filter-select" id="cart-filter-mes" onchange="renderCartoes()" style="font-size:.85rem;padding:8px 14px">
+        <select class="filter-select" id="cart-filter-mes" onchange="_cartMesGrafico=this.value;renderCartoes()" style="font-size:.85rem;padding:8px 14px">
           <option value="">Todos os meses</option>
         </select>
         <select class="filter-select" id="cart-filter-tipo" onchange="renderCartoes()" style="font-size:.85rem;padding:8px 14px">
@@ -1478,16 +1478,16 @@ function prevDetalhe(mes,cart){
   wrap.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+// Mês selecionado via clique no gráfico (independente do select)
+let _cartMesGrafico="";
 function selecionarMesCartao(mes){
+  _cartMesGrafico=(_cartMesGrafico===mes)?"":mes;
+  // Sincroniza o select também (se o mês existir)
   const sel=document.getElementById("cart-filter-mes");
-  if(!sel) return;
-  // Toggle: clicar no mesmo mês já filtrado limpa o filtro
-  if(sel.value===mes){ sel.value=""; }
-  else {
-    // Garante que a option existe (pode não estar no select ainda)
+  if(sel){
     const exists=[...sel.options].some(o=>o.value===mes);
-    if(!exists){ const o=document.createElement("option"); o.value=mes; o.text=mes; sel.appendChild(o); }
-    sel.value=mes;
+    if(!exists&&mes){ const o=document.createElement("option"); o.value=mes; o.text=mes; sel.appendChild(o); }
+    sel.value=_cartMesGrafico;
   }
   renderCartoes();
 }
@@ -1497,6 +1497,7 @@ function limparFiltrosCartoes(){
   const t=document.getElementById("cart-filter-tipo");
   if(n) n.value="";
   if(m) m.value="";
+  _cartMesGrafico="";
   if(t) t.value="";
   renderCartoes();
 }
@@ -1505,7 +1506,7 @@ function renderCartoes(){
   const cartSel=document.getElementById('cart-filter-nome');
   const mesSel=document.getElementById('cart-filter-mes');
   const nomeF=cartSel?.value||'';
-  const mesF=mesSel?.value||'';
+  const mesF=_cartMesGrafico||(mesSel?.value||"");
   const tipoF=document.getElementById('cart-filter-tipo')?.value||'';
 
   if(cartSel&&cartSel.options.length<=1) db.cartoes.forEach(c=>{const o=document.createElement('option');o.value=c.nome;o.text=c.nome;cartSel.appendChild(o);});
@@ -1531,21 +1532,59 @@ function renderCartoes(){
     </div>`;
   } else { painelEl.innerHTML=''; }
 
-  // Faturas por mês
+  // Faturas por mês — projeta parceladas nos meses futuros igual ao gráfico
   let cf=db.compras;
   if(nomeF) cf=cf.filter(c=>c.cartao===nomeF);
-  if(mesF)  cf=cf.filter(c=>c.comp===mesF);
   if(tipoF==='avista')    cf=cf.filter(c=>c.npar<=1);
   if(tipoF==='parcelado') cf=cf.filter(c=>c.npar>1);
 
-  const mesesV=[...new Set(cf.map(c=>c.comp))].sort();
+  // Função: dado mesF, retorna lista de {compra, parAtualNesteMes} que aparecem naquele mês
+  function projetarParaMes(compras, mes){
+    const result=[];
+    compras.forEach(c=>{
+      const npar=c.npar||1;
+      const parAtual=c.parAtual||1;
+      if(npar<=1){
+        // À vista: aparece só no mês comp
+        if(c.comp===mes) result.push({...c});
+      } else {
+        // Calcula qual parcela cai em `mes`
+        const [ano,m]=c.comp.split('-').map(Number);
+        const compDate=new Date(ano,m-1,1);
+        const [fano,fm]=mes.split('-').map(Number);
+        const mesDate=new Date(fano,fm-1,1);
+        const diffMeses=Math.round((mesDate-compDate)/(1000*60*60*24*30.44));
+        if(diffMeses>=0){
+          const parNesteMes=parAtual+diffMeses;
+          if(parNesteMes<=npar){
+            result.push({...c, parAtual:parNesteMes});
+          }
+        }
+      }
+    });
+    return result;
+  }
+
+  let mesesV, cfPorMes;
+  if(mesF){
+    // Filtro de mês ativo: mostra só aquele mês com projeção correta
+    const projetados=projetarParaMes(cf, mesF);
+    mesesV=projetados.length?[mesF]:[];
+    cfPorMes={[mesF]:projetados};
+  } else {
+    // Sem filtro: agrupa por comp (mês original) — comportamento padrão
+    mesesV=[...new Set(cf.map(c=>c.comp))].sort();
+    cfPorMes={};
+    mesesV.forEach(m=>{ cfPorMes[m]=cf.filter(c=>c.comp===m); });
+  }
+
   const fw=document.getElementById('cart-faturas-wrap');
 
   if(!mesesV.length){
     fw.innerHTML=`<div class="table-wrap"><div class="table-empty">Nenhum lançamento encontrado. Use "+ Lançar compra" ou "📥 CSV" para adicionar.</div></div>`;
   } else {
     fw.innerHTML=mesesV.map(mes=>{
-      const itens=cf.filter(c=>c.comp===mes).sort((a,b)=>(a.data||'').localeCompare(b.data||''));
+      const itens=(cfPorMes[mes]||[]).sort((a,b)=>(a.data||'').localeCompare(b.data||''));
       const total=itens.reduce((a,c)=>a+c.valor,0);
       const avista=itens.filter(c=>c.npar<=1).reduce((a,c)=>a+c.valor,0);
       const parc=itens.filter(c=>c.npar>1).reduce((a,c)=>a+c.valor,0);
