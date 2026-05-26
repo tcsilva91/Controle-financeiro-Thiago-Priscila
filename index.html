@@ -1478,6 +1478,19 @@ function prevDetalhe(mes,cart){
   wrap.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+function selecionarMesCartao(mes){
+  const sel=document.getElementById("cart-filter-mes");
+  if(!sel) return;
+  // Toggle: clicar no mesmo mês já filtrado limpa o filtro
+  if(sel.value===mes){ sel.value=""; }
+  else {
+    // Garante que a option existe (pode não estar no select ainda)
+    const exists=[...sel.options].some(o=>o.value===mes);
+    if(!exists){ const o=document.createElement("option"); o.value=mes; o.text=mes; sel.appendChild(o); }
+    sel.value=mes;
+  }
+  renderCartoes();
+}
 function limparFiltrosCartoes(){
   const n=document.getElementById("cart-filter-nome");
   const m=document.getElementById("cart-filter-mes");
@@ -1694,7 +1707,7 @@ function renderCartoes(){
     const labelColor=isMesFiltrado?"var(--blue)":isCur?"var(--blue)":"var(--slate-light)";
     const labelWeight=isMesFiltrado||isCur?700:400;
     const bgCol=isMesFiltrado?"var(--blue-pale)":isCur?"var(--blue-pale)":"transparent";
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:0;flex:1;min-width:0;opacity:${isApagado?0.4:1}">
+    return `<div onclick="selecionarMesCartao('${m}')" style="display:flex;flex-direction:column;align-items:center;gap:0;flex:1;min-width:0;opacity:${isApagado?0.4:1};cursor:pointer" title="${tot>0?fmtK(tot)+' — clicar para filtrar':'Sem lançamentos'}">
       <div style="font-size:.6rem;color:${valColor};font-weight:${tot>8000?700:400};white-space:nowrap;text-align:center;height:16px;display:flex;align-items:center;justify-content:center">${tot>0?fmtK(tot):""}</div>
       <div style="display:flex;flex-direction:column;justify-content:flex-end;width:75%;height:${BAR_H}px;background:${bgCol};border-radius:3px 3px 0 0;overflow:hidden">
         <div style="display:flex;flex-direction:column;justify-content:flex-end;width:100%;height:100%;overflow:hidden;border-radius:3px 3px 0 0">${barHtml}</div>
