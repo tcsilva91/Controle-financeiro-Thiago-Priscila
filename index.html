@@ -301,9 +301,9 @@
   .cas-mchart-title{font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:14px;}
   .cas-mchart-bars{display:flex;align-items:flex-end;gap:5px;height:100px;}
   .cas-mchart-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:0;}
-  .cas-mchart-val{font-size:.59rem;color:var(--slate);text-align:center;line-height:1.1;height:14px;display:flex;align-items:center;justify-content:center;white-space:nowrap;}
+  .cas-mchart-val{font-size:.59rem;color:var(--slate);white-space:nowrap;text-align:center;line-height:1;height:16px;display:flex;align-items:center;justify-content:center;}
   .cas-mchart-bar{width:100%;border-radius:3px 3px 0 0;cursor:default;}
-  .cas-mchart-label{font-size:.63rem;color:var(--slate-light);white-space:nowrap;text-align:center;margin-top:3px;}
+  .cas-mchart-label{font-size:.63rem;color:var(--slate-light);white-space:nowrap;text-align:right;margin-top:4px;transform:rotate(-45deg);transform-origin:top right;display:block;line-height:1;}
   .cas-mchart-label.cur{color:var(--blue);font-weight:700;}
 
   /* LUA INLINE EDIT */
@@ -390,7 +390,6 @@
         <div class="table-header">
           <span class="table-header-title">Fornecedores e despesas</span>
           <div class="table-filters">
-            <select class="filter-select" id="cas-filter-cat" onchange="renderCasamento()"><option value="">Categoria</option></select>
             <select class="filter-select" id="cas-filter-status" onchange="renderCasamento()"><option value="">Status</option><option>previsto</option><option>contratado</option><option>pago parcial</option><option>pago total</option><option>cancelado</option></select>
             <button class="btn btn-primary btn-sm" onclick="openModal('casamento')">+ Adicionar</button>
           </div>
@@ -452,41 +451,12 @@
         </div>
       </div>
 
-      <!-- Gráfico de barras por mês -->
-      <div class="table-wrap section-gap" id="cart-chart-wrap"></div>
 
       <!-- Painel do cartão selecionado -->
       <div id="cart-painel"></div>
 
-      <!-- Previsão de parcelas abertas — grade mês × cartão -->
-      <div class="table-wrap section-gap">
-        <div class="table-header">
-          <span class="table-header-title">🔮 Previsão de parcelas por cartão</span>
-          <select class="filter-select" id="prev-filter-ano" onchange="renderCartoes()">
-            <option value="2026">2026</option>
-            <option value="2027">2027</option>
-          </select>
-        </div>
-        <div style="overflow-x:auto">
-          <table id="prev-grade-table">
-            <thead id="prev-grade-head"></thead>
-            <tbody id="prev-grade-body"></tbody>
-            <tfoot id="prev-grade-foot"></tfoot>
-          </table>
-        </div>
-      </div>
-
-      <!-- Detalhe ao clicar numa célula da grade -->
-      <div class="table-wrap" id="prev-detalhe-wrap" style="margin-top:20px;display:none">
-        <div class="table-header">
-          <span class="table-header-title" id="prev-detalhe-titulo">Detalhe</span>
-          <button class="btn btn-outline btn-sm" onclick="document.getElementById('prev-detalhe-wrap').style.display='none'">✕ Fechar</button>
-        </div>
-        <div style="overflow-x:auto">
-          <table><thead><tr><th>Item</th><th>Parcela</th><th>Vencimento</th><th>Valor</th></tr></thead>
-          <tbody id="prev-detalhe-body"></tbody></table>
-        </div>
-      </div>
+      <!-- Gráfico de barras por cartão -->
+      <div class="table-wrap section-gap" id="cart-parcelas-chart-wrap"></div>
 
       <!-- Faturas por mês (lançamentos) -->
       <div id="cart-faturas-wrap"></div>
@@ -577,7 +547,6 @@
   <div class="modal">
     <div class="modal-head"><h3 id="m-cas-title">Novo item — Casamento</h3><button class="close-btn" onclick="closeModal('casamento')">✕</button></div>
     <div class="modal-body">
-      <div class="field"><label>Categoria</label><select id="m-cas-cat"><option>Espaço / buffet</option><option>Decoração</option><option>Música / banda / DJ</option><option>Fotografia e vídeo</option><option>Cerimonial</option><option>Vestido da noiva</option><option>Traje do noivo</option><option>Beleza da noiva</option><option>Convites / papelaria</option><option>Hospedagem / deslocamento</option><option>Viagem casamento</option><option>Taxas extras</option><option>Outros</option></select></div>
       <div class="field"><label>Fornecedor</label><input id="m-cas-fornecedor" placeholder="Nome do fornecedor"></div>
       <div class="field"><label>Valor previsto (R$)</label><input id="m-cas-previsto" type="number" step="0.01"></div>
       <div class="field"><label>Valor contratado (R$)</label><input id="m-cas-contratado" type="number" step="0.01"></div>
@@ -586,11 +555,7 @@
       <div class="field"><label>Parcelas pagas</label><input id="m-cas-parcelas-pagas" type="number" min="0" placeholder="Quantas já foram pagas"></div>
       <div class="field"><label>Valor da parcela (R$)</label><input id="m-cas-vparcela" type="number" step="0.01"></div>
       <div class="field"><label>Vencimento próxima parcela</label><input id="m-cas-venc" type="date"></div>
-      <div class="field"><label>Forma de pagamento</label><select id="m-cas-forma"><option>Crédito</option><option>Débito</option><option>PIX</option><option>Boleto</option><option>Dinheiro</option></select></div>
-      <div class="field"><label>Cartão / Conta</label><input id="m-cas-cartao" placeholder="Ex: Nubank Thiago"></div>
       <div class="field full"><label>Chave PIX do fornecedor</label><input id="m-cas-pix" placeholder="CPF, CNPJ, e-mail ou celular"></div>
-      <div class="field"><label>Responsável</label><select id="m-cas-resp"><option>Thiago</option><option>Priscila</option><option>Ambos</option></select></div>
-      <div class="field"><label>Status</label><select id="m-cas-status"><option>previsto</option><option>contratado</option><option>pago parcial</option><option>pago total</option><option>cancelado</option></select></div>
       <div class="field full"><label>Observações</label><textarea id="m-cas-obs"></textarea></div>
     </div>
     <div class="modal-foot">
@@ -873,17 +838,35 @@ const defaultData = {
   ],
 
   acoes: [
-    {id:1,desc:'Contatar Hotel Sonus Alpis para reserva (15–19/set)',resp:'Thiago',prazo:'2026-05-26',status:'pendente',prioridade:'alta',obs:'Confirmar disponibilidade, valores e formas de pagamento.'},
-    {id:2,desc:'Fechar hospedagem Ortisei — confirmar se será Sonus Alpis ou outro',resp:'Thiago',prazo:'2026-05-26',status:'pendente',prioridade:'alta',obs:'Orçamento estimado R$8.500. Reservar até jun/26.'},
-    {id:3,desc:'Confirmar datas de devolução do carro (22 ou 23/set)',resp:'Thiago',prazo:'2026-06-01',status:'pendente',prioridade:'alta',obs:'Hotéis já contemplam a diária extra até 23/set.'},
-    {id:4,desc:'Pagar Gerador — entrada R$750 (mai/26)',resp:'Thiago',prazo:'2026-05-31',status:'pendente',prioridade:'alta',obs:'Pedir contrato, assinar e pagar.'},
-    {id:5,desc:'Pagar Chopp — entrada R$300 (mai/26)',resp:'Thiago',prazo:'2026-05-31',status:'pendente',prioridade:'media',obs:'Aguardando orçamento Jarllan.'},
-    {id:6,desc:'Pagar DJ — entrada R$1.500 (mai/26)',resp:'Thiago',prazo:'2026-05-31',status:'pendente',prioridade:'alta',obs:'Aguardando orçamento Jarllan.'},
-    {id:7,desc:'Pagar Seguranças — R$435 (mai/26)',resp:'Thiago',prazo:'2026-05-31',status:'pendente',prioridade:'media',obs:''},
-    {id:8,desc:'Agendar reunião com Banda Locomotiva + pedir contrato',resp:'Thiago',prazo:'2026-06-15',status:'pendente',prioridade:'media',obs:''},
-    {id:9,desc:'Reservar Pedágio Tre Cime (auronzo.it)',resp:'Thiago',prazo:'2026-08-01',status:'pendente',prioridade:'baixa',obs:'~EUR 40. Reservar em ago/26, pagar no local.'},
-    {id:10,desc:'Confirmar parcelas do Airbnb HMHWQYJMA (Itaú Priscila)',resp:'Priscila',prazo:'2026-06-01',status:'pendente',prioridade:'media',obs:'Identificar se são reservas de trabalho ou lua de mel.'},
-    {id:11,desc:'Inserir receitas mensais de Thiago e Priscila na aba Receitas',resp:'Ambos',prazo:'2026-06-01',status:'pendente',prioridade:'media',obs:'Atualizar meses de mai/26 em diante com valores reais.'},
+    // ── MAI/26 ──
+    {id:1,desc:"PIX Gerador — R$750",resp:"Thiago",prazo:"2026-05-31",status:"pendente",prioridade:"alta",obs:"Pedir contrato e assinar antes de pagar. Sem chave PIX cadastrada."},
+    {id:2,desc:"PIX Chopp (Jarllan) — aguardando orçamento",resp:"Thiago",prazo:"2026-05-31",status:"pendente",prioridade:"alta",obs:"Aguardando orçamento. Entrada prevista ~R$300."},
+    {id:3,desc:"PIX DJ (Jarllan) — aguardando orçamento",resp:"Thiago",prazo:"2026-05-31",status:"pendente",prioridade:"alta",obs:"Aguardando orçamento. Entrada prevista ~R$1.500."},
+    {id:4,desc:"PIX Seguranças — R$435",resp:"Thiago",prazo:"2026-05-31",status:"pendente",prioridade:"alta",obs:"PIX: Aguardando chave."},
+    // ── JUN/26 — R$4.274,50 ──
+    {id:5,desc:"PIX 2Planner — R$332,50 (11ª/12)",resp:"Ambos",prazo:"2026-06-01",status:"pendente",prioridade:"alta",obs:"PIX: 26.577.979/0001-59"},
+    {id:6,desc:"PIX Araújo Decoração — R$2.184 (4ª/5)",resp:"Priscila",prazo:"2026-06-01",status:"pendente",prioridade:"alta",obs:"PIX: 55694649000141"},
+    {id:7,desc:"PIX Alta Foto e Vídeo — R$450 (4ª/5)",resp:"Ambos",prazo:"2026-06-01",status:"pendente",prioridade:"alta",obs:"PIX: 85991306345"},
+    {id:8,desc:"PIX Carol Doces — R$734 (4ª/5)",resp:"Priscila",prazo:"2026-06-01",status:"pendente",prioridade:"alta",obs:"PIX: 07.090.946/0001-35"},
+    {id:9,desc:"PIX Trinken Coquetel — R$574 (4ª/5)",resp:"Ambos",prazo:"2026-06-01",status:"pendente",prioridade:"alta",obs:"PIX: 50.001.646/0001-61"},
+    // ── JUL/26 — R$4.274,50 ──
+    {id:10,desc:"PIX 2Planner — R$332,50 (12ª/12)",resp:"Ambos",prazo:"2026-07-01",status:"pendente",prioridade:"alta",obs:"PIX: 26.577.979/0001-59 — última parcela"},
+    {id:11,desc:"PIX Araújo Decoração — R$2.184 (5ª/5)",resp:"Priscila",prazo:"2026-07-01",status:"pendente",prioridade:"alta",obs:"PIX: 55694649000141 — última parcela"},
+    {id:12,desc:"PIX Alta Foto e Vídeo — R$450 (5ª/5)",resp:"Ambos",prazo:"2026-07-01",status:"pendente",prioridade:"alta",obs:"PIX: 85991306345 — última parcela"},
+    {id:13,desc:"PIX Carol Doces — R$734 (5ª/5)",resp:"Priscila",prazo:"2026-07-01",status:"pendente",prioridade:"alta",obs:"PIX: 07.090.946/0001-35 — última parcela"},
+    {id:14,desc:"PIX Trinken Coquetel — R$574 (5ª/5)",resp:"Ambos",prazo:"2026-07-01",status:"pendente",prioridade:"alta",obs:"PIX: 50.001.646/0001-61 — última parcela"},
+    // ── AGO/26 — R$30.615 ──
+    {id:15,desc:"PIX Buffet Castelli — R$18.310 (2ª/2)",resp:"Ambos",prazo:"2026-08-01",status:"pendente",prioridade:"alta",obs:"PIX: 53.046.046/0001-08 — saldo final do buffet"},
+    {id:16,desc:"PIX Locomotiva Banda — R$5.500 (2ª/2)",resp:"Thiago",prazo:"2026-08-01",status:"pendente",prioridade:"alta",obs:"PIX: 803.876.163-49 — agendar reunião e pedir contrato antes"},
+    {id:17,desc:"PIX Cabelo e Maquiagem — R$2.100 (2ª/2)",resp:"Priscila",prazo:"2026-08-01",status:"pendente",prioridade:"alta",obs:"PIX: 88997873073"},
+    {id:18,desc:"PIX Gerador — R$1.880 (2ª/2)",resp:"Thiago",prazo:"2026-08-01",status:"pendente",prioridade:"alta",obs:"Sem chave PIX cadastrada ainda."},
+    {id:19,desc:"PIX Vineyard Locação — R$1.750 (2ª/2)",resp:"Ambos",prazo:"2026-08-01",status:"pendente",prioridade:"alta",obs:"PIX: 30820402000101"},
+    {id:20,desc:"PIX Romildo Bolo — R$625 (2ª/2)",resp:"Priscila",prazo:"2026-08-01",status:"pendente",prioridade:"media",obs:"PIX: 94956847300 — confirmar sobre frutas"},
+    {id:21,desc:"PIX Balcão Bar — R$450 (2ª/2)",resp:"Ambos",prazo:"2026-08-01",status:"pendente",prioridade:"media",obs:"PIX: 85999737752"},
+    // ── LUA DE MEL ──
+    {id:22,desc:"Fechar hospedagem Ortisei (Hotel Sonus Alpis)",resp:"Thiago",prazo:"2026-06-01",status:"pendente",prioridade:"alta",obs:"Orçamento ~R$8.500. Confirmar disponibilidade e forma de pagamento."},
+    {id:23,desc:"Confirmar devolução do carro (22 ou 23/set)",resp:"Thiago",prazo:"2026-06-01",status:"pendente",prioridade:"alta",obs:"Rentalcars — diária extra até 23/set já contemplada nos hotéis."},
+    {id:24,desc:"Reservar Pedágio Tre Cime (auronzo.it)",resp:"Thiago",prazo:"2026-08-01",status:"pendente",prioridade:"baixa",obs:"~EUR 40. Reservar em ago/26, pagar no local."},
   ],
   compras: [{"id": 1, "desc": "Dl*Dlrappi", "data": "2026-05-24", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 74.96, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 2, "desc": "Dl *Uberrides", "data": "2026-05-24", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 33.27, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 3, "desc": "Dl *Uberrides", "data": "2026-05-23", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 12.47, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 4, "desc": "Mirante Flat", "data": "2026-05-23", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 206.03, "npar": 1, "parAtual": 1, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 5, "desc": "Fel Empreendimentos C", "data": "2026-05-23", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 34.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 6, "desc": "Mariaclara", "data": "2026-05-23", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 96.0, "npar": 1, "parAtual": 1, "cat": "Vestuário", "status": "aberta", "obs": ""}, {"id": 7, "desc": "Dl *Uberrides", "data": "2026-05-23", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 56.71, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 8, "desc": "Leve Minas Emporium", "data": "2026-05-23", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 41.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 9, "desc": "Rotor Combustiveis e L", "data": "2026-05-22", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 258.97, "npar": 1, "parAtual": 1, "cat": "Transporte", "status": "aberta", "obs": ""}, {"id": 10, "desc": "Dl*Uberrides", "data": "2026-05-22", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 34.23, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 11, "desc": "Dl *Uberrides", "data": "2026-05-22", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 49.79, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 12, "desc": "Uber Uber *Trip Help.U", "data": "2026-05-22", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 42.02, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 13, "desc": "Sup Epa Cento e Vinte", "data": "2026-05-21", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 33.02, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 14, "desc": "Instituto Vem Ser", "data": "2026-05-21", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 41.75, "npar": 1, "parAtual": 1, "cat": "Saúde", "status": "aberta", "obs": ""}, {"id": 15, "desc": "Rappi *Moustache Beam", "data": "2026-05-21", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 35.03, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 16, "desc": "Shopee *Silvestlingeri", "data": "2026-05-20", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 62.9, "npar": 1, "parAtual": 1, "cat": "Vestuário", "status": "aberta", "obs": ""}, {"id": 17, "desc": "Claro *11939489075", "data": "2026-05-20", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 76.82, "npar": 1, "parAtual": 1, "cat": "Internet", "status": "aberta", "obs": ""}, {"id": 18, "desc": "Ifd*Cb Alimentacao", "data": "2026-05-19", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 76.3, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 19, "desc": "Ibis Bh Afonso Pena", "data": "2026-05-19", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 44.93, "npar": 6, "parAtual": 1, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 20, "desc": "Restaurante da Celinha", "data": "2026-05-19", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 25.0, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 21, "desc": "Dl *Uberrides", "data": "2026-05-19", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 17.93, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 22, "desc": "Kikize Burguer", "data": "2026-05-19", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 71.0, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 23, "desc": "Rappi *Vpch Bar e Res", "data": "2026-05-18", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 162.7, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 24, "desc": "Jorge Cristiano August", "data": "2026-05-18", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 160.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 25, "desc": "Dl *Uberrides", "data": "2026-05-18", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 36.95, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 26, "desc": "Dl*Dlrappi", "data": "2026-05-17", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 23.76, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 27, "desc": "Mais Ok Mercadinho", "data": "2026-05-17", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 19.15, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 28, "desc": "Ifd*Confeitaria Nova C", "data": "2026-05-17", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 31.34, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 29, "desc": "Mercado Extra", "data": "2026-05-17", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 78.8, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 30, "desc": "Drogasil2428", "data": "2026-05-17", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 49.34, "npar": 1, "parAtual": 1, "cat": "Farmácia", "status": "aberta", "obs": ""}, {"id": 31, "desc": "Smiles Clube Smiles", "data": "2026-05-16", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 42.0, "npar": 1, "parAtual": 1, "cat": "Assinatura", "status": "aberta", "obs": ""}, {"id": 32, "desc": "Air Farma", "data": "2026-05-16", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 21.5, "npar": 1, "parAtual": 1, "cat": "Farmácia", "status": "aberta", "obs": ""}, {"id": 33, "desc": "Mirante Flat", "data": "2026-05-16", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 121.11, "npar": 1, "parAtual": 1, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 34, "desc": "Taxi 15mai 16h53min", "data": "2026-05-16", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 182.3, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 35, "desc": "Dl*Uberrides", "data": "2026-05-16", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 9.43, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 36, "desc": "Fel Empreendimentos C", "data": "2026-05-16", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 34.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 37, "desc": "Leve Minas Emporium", "data": "2026-05-16", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 46.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 38, "desc": "Dl *Uberrides", "data": "2026-05-16", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 57.94, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 39, "desc": "Dl *Uberrides", "data": "2026-05-15", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 35.5, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 40, "desc": "Dl *Uberrides", "data": "2026-05-15", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 39.98, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 41, "desc": "Dl*Uberrides", "data": "2026-05-15", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 15.38, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 42, "desc": "Dl*Dlrappi", "data": "2026-05-15", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 49.94, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 43, "desc": "Ifd*64057907 Hudson Vi", "data": "2026-05-15", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 70.22, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 44, "desc": "Uber Uber *Trip Help.U", "data": "2026-05-14", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 55.49, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 45, "desc": "Dl*Dlrappi", "data": "2026-05-14", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 34.41, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 46, "desc": "Dl*Uberrides", "data": "2026-05-14", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 54.39, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 47, "desc": "Instituto Vem Ser", "data": "2026-05-14", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 63.9, "npar": 1, "parAtual": 1, "cat": "Saúde", "status": "aberta", "obs": ""}, {"id": 48, "desc": "Shopee *Facilcomprabr", "data": "2026-05-13", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 25.99, "npar": 1, "parAtual": 1, "cat": "Vestuário", "status": "aberta", "obs": ""}, {"id": 49, "desc": "Restaurante Camunho D", "data": "2026-05-13", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 89.7, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 50, "desc": "Restaurante da Celinha", "data": "2026-05-12", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 26.0, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 51, "desc": "Sup Epa Cento e Vinte", "data": "2026-05-12", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 40.7, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 52, "desc": "Nu Seguro Celular", "data": "2026-05-11", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 38.78, "npar": 1, "parAtual": 1, "cat": "Saúde", "status": "aberta", "obs": ""}, {"id": 53, "desc": "Dl *Uberrides", "data": "2026-05-11", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 27.96, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 54, "desc": "Rappi*Rappi Brasil Int", "data": "2026-05-11", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 24.9, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 55, "desc": "Jorge Cristiano August", "data": "2026-05-11", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 170.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 56, "desc": "Fel Empreendimentos C", "data": "2026-05-11", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 34.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 57, "desc": "Ifd*Cb Alimentacao", "data": "2026-05-11", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 56.89, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 58, "desc": "Dl*Uberrides", "data": "2026-05-11", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 47.97, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 59, "desc": "Giovanevasconcell", "data": "2026-05-11", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 26.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 60, "desc": "Dl *Uberrides", "data": "2026-05-11", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 19.96, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 61, "desc": "Soberana Padaria e Con", "data": "2026-05-10", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 20.5, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 62, "desc": "Dl *Uberrides", "data": "2026-05-10", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 41.94, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 63, "desc": "Viladelli", "data": "2026-05-10", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 10.8, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 64, "desc": "Cpg*Fazticket Vix", "data": "2026-05-10", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 78.65, "npar": 1, "parAtual": 1, "cat": "Lazer", "status": "aberta", "obs": ""}, {"id": 65, "desc": "Dl *Uberrides", "data": "2026-05-10", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 72.97, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 66, "desc": "Drogarias Santa Lucia", "data": "2026-05-10", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 42.88, "npar": 1, "parAtual": 1, "cat": "Farmácia", "status": "aberta", "obs": ""}, {"id": 67, "desc": "Quintalzinho", "data": "2026-05-10", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 90.15, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 68, "desc": "Air Europa Not-Availa", "data": "2026-05-09", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 483.78, "npar": 12, "parAtual": 1, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 69, "desc": "Dl *Uberrides", "data": "2026-05-09", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 17.97, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 70, "desc": "Mp *Success", "data": "2026-05-09", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 60.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 71, "desc": "Air Europa Not-Availa", "data": "2026-05-09", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 538.84, "npar": 12, "parAtual": 1, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 72, "desc": "IOF de compra internacional", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 81.41, "npar": 1, "parAtual": 1, "cat": "Impostos", "status": "aberta", "obs": ""}, {"id": 73, "desc": "Latam Air*Lojygf", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 499.19, "npar": 1, "parAtual": 1, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 74, "desc": "Mp *Henriquehorta", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 10.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 75, "desc": "Dl*Uberrides", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 59.95, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 76, "desc": "Felipe Sampaio Joaquim", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 35.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 77, "desc": "Eliaureasilva", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 10.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 78, "desc": "Victoria Carnes e Cia", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 106.58, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 79, "desc": "Rentalcars.Com", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 2326.2, "npar": 1, "parAtual": 1, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 80, "desc": "Latam Air*Ivhxmq", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 302.51, "npar": 4, "parAtual": 1, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 81, "desc": "Meire Moura Alves", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 8.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 82, "desc": "Mp *53097377melin", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 20.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 83, "desc": "Camiloefernandes", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 10.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 84, "desc": "Peixoto", "data": "2026-05-08", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 235.0, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 85, "desc": "Dl *Uberrides", "data": "2026-05-07", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 1.26, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 86, "desc": "Ifd*Confeitaria Nova C", "data": "2026-05-07", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 31.34, "npar": 1, "parAtual": 1, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 87, "desc": "Dl *Uberrides", "data": "2026-05-07", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 23.69, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 88, "desc": "Inovamachines", "data": "2026-05-07", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 27.8, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 89, "desc": "Loccitane Frei Caneca", "data": "2026-05-07", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 44.95, "npar": 6, "parAtual": 1, "cat": "Vestuário", "status": "aberta", "obs": ""}, {"id": 90, "desc": "Lanchonetee", "data": "2026-05-06", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 5.0, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 91, "desc": "Lavlab Lavanderia", "data": "2026-05-06", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 43.2, "npar": 1, "parAtual": 1, "cat": "Casa", "status": "aberta", "obs": ""}, {"id": 92, "desc": "Lojas Renner Fl", "data": "2026-05-06", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 64.9, "npar": 2, "parAtual": 1, "cat": "Vestuário", "status": "aberta", "obs": ""}, {"id": 93, "desc": "Rodrigopauloda", "data": "2026-05-06", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 77.7, "npar": 1, "parAtual": 1, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 94, "desc": "IOF de compra internacional", "data": "2026-05-04", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 4.0, "npar": 1, "parAtual": 1, "cat": "Impostos", "status": "aberta", "obs": ""}, {"id": 95, "desc": "Claude.Ai Subscription", "data": "2026-05-04", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 114.31, "npar": 1, "parAtual": 1, "cat": "Assinatura", "status": "aberta", "obs": ""}, {"id": 96, "desc": "Ibis Budget Bh Savassi", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 123.37, "npar": 2, "parAtual": 2, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 97, "desc": "Dl *Uberrides", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 54.34, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 98, "desc": "Mp *Wtenniscombr", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 72.63, "npar": 10, "parAtual": 7, "cat": "A definir", "status": "aberta", "obs": ""}, {"id": 99, "desc": "Smiles Fidel*Bilhete", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 266.8, "npar": 5, "parAtual": 5, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 100, "desc": "Dl *Uberrides", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 9.97, "npar": 1, "parAtual": 1, "cat": "Uber", "status": "aberta", "obs": ""}, {"id": 101, "desc": "Airbnb * Hmbttpzs2z", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 92.85, "npar": 6, "parAtual": 4, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 102, "desc": "Shopee *F68a34137w", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 56.17, "npar": 5, "parAtual": 3, "cat": "Vestuário", "status": "aberta", "obs": ""}, {"id": 103, "desc": "Shopee *Carolinaartes", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 69.99, "npar": 2, "parAtual": 2, "cat": "Vestuário", "status": "aberta", "obs": ""}, {"id": 104, "desc": "Mercadolivre*Mercadol", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 267.35, "npar": 12, "parAtual": 6, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"id": 105, "desc": "Kalunga Frei*Kalunga", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 32.26, "npar": 3, "parAtual": 2, "cat": "Casa", "status": "aberta", "obs": ""}, {"id": 106, "desc": "Fabrique", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 160.0, "npar": 1, "parAtual": 1, "cat": "Vestuário", "status": "aberta", "obs": ""}, {"id": 107, "desc": "Airbnb * Hmqwkqqq9t", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 155.07, "npar": 6, "parAtual": 5, "cat": "Viagens", "status": "aberta", "obs": ""}, {"id": 108, "desc": "Shopee *Evasperfumaria", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 67.47, "npar": 4, "parAtual": 4, "cat": "Vestuário", "status": "aberta", "obs": ""}, {"id": 109, "desc": "Pao de Acucar Com", "data": "2026-05-03", "comp": "2026-06", "cartao": "Nubank Thiago (Black)", "valor": 174.29, "npar": 3, "parAtual": 2, "cat": "Alimentação", "status": "aberta", "obs": ""}, {"desc": "Mercadolivre*Stras", "data": "2025-09-22", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 122.99, "npar": 10, "parAtual": 9, "cat": "Vestuário", "id": 110, "status": "aberta"}, {"desc": "Mercadolivre*Goodi", "data": "2025-09-24", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 26.38, "npar": 12, "parAtual": 9, "cat": "A definir", "id": 111, "status": "aberta"}, {"desc": "Fisia Comercio", "data": "2025-11-23", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 346.2, "npar": 10, "parAtual": 7, "cat": "Saúde", "id": 112, "status": "aberta"}, {"desc": "Anna Pegova", "data": "2025-11-25", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 230.4, "npar": 6, "parAtual": 6, "cat": "Saúde", "id": 113, "status": "aberta"}, {"desc": "MC Via Parque", "data": "2025-11-27", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 82.88, "npar": 6, "parAtual": 6, "cat": "Vestuário", "id": 114, "status": "aberta"}, {"desc": "Jesmond Comercio", "data": "2025-11-27", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 32.8, "npar": 8, "parAtual": 7, "cat": "A definir", "id": 115, "status": "aberta"}, {"desc": "Centauro.com", "data": "2025-11-29", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 32.89, "npar": 7, "parAtual": 7, "cat": "Lazer", "id": 116, "status": "aberta"}, {"desc": "Sephora Store", "data": "2025-11-29", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 50.48, "npar": 10, "parAtual": 7, "cat": "Saúde", "id": 117, "status": "aberta"}, {"desc": "Terapeutica", "data": "2026-01-05", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 3000.0, "npar": 5, "parAtual": 5, "cat": "Saúde", "id": 118, "status": "aberta"}, {"desc": "PG *Nuvem Saintger", "data": "2026-01-17", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 52.5, "npar": 6, "parAtual": 5, "cat": "Assinatura", "id": 119, "status": "aberta"}, {"desc": "Renner", "data": "2026-01-19", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 87.84, "npar": 5, "parAtual": 5, "cat": "Vestuário", "id": 120, "status": "aberta"}, {"desc": "Airbnb * HMHWQYJMA", "data": "2026-01-24", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 959.8, "npar": 6, "parAtual": 4, "cat": "A definir", "id": 121, "status": "aberta"}, {"desc": "MLP*Netshoes", "data": "2026-02-09", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 72.34, "npar": 5, "parAtual": 5, "cat": "Vestuário", "id": 122, "status": "aberta"}, {"desc": "Airbnb * HMHWQYJMA", "data": "2026-02-27", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 137.15, "npar": 6, "parAtual": 3, "cat": "A definir", "id": 123, "status": "aberta"}, {"desc": "Shadevenne", "data": "2026-03-17", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 1000.0, "npar": 5, "parAtual": 3, "cat": "Saúde", "id": 124, "status": "aberta"}, {"desc": "GOL Linhas Aéreas", "data": "2026-04-15", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 562.5, "npar": 4, "parAtual": 2, "cat": "Viagens", "id": 125, "status": "aberta"}, {"desc": "IFD*Kome Restaurante", "data": "2026-04-20", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 30.99, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 126, "status": "aberta"}, {"desc": "Master Supermercados", "data": "2026-04-21", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 262.56, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 127, "status": "aberta"}, {"desc": "Balaio Mocoto IMS", "data": "2026-04-21", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 19.0, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 128, "status": "aberta"}, {"desc": "Sacolao da Augusta", "data": "2026-04-21", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 4.39, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 129, "status": "aberta"}, {"desc": "Instituto Moreira Sall", "data": "2026-04-21", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 20.0, "npar": 1, "parAtual": 1, "cat": "Lazer", "id": 130, "status": "aberta"}, {"desc": "Shopee *Patrondistribu", "data": "2026-04-24", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 28.49, "npar": 1, "parAtual": 1, "cat": "A definir", "id": 131, "status": "aberta"}, {"desc": "Drogasil", "data": "2026-04-25", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 9.77, "npar": 1, "parAtual": 1, "cat": "Farmácia", "id": 132, "status": "aberta"}, {"desc": "Logoali Express", "data": "2026-04-25", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 7.5, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 133, "status": "aberta"}, {"desc": "IFD*Altruista Osteria", "data": "2026-04-26", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 84.43, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 134, "status": "aberta"}, {"desc": "Amazon Marketplace", "data": "2026-04-26", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 62.54, "npar": 12, "parAtual": 1, "cat": "A definir", "id": 135, "status": "aberta"}, {"desc": "Zelo Net", "data": "2026-04-26", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 76.65, "npar": 6, "parAtual": 1, "cat": "Internet", "id": 136, "status": "aberta"}, {"desc": "IFD*Kome Restaurante", "data": "2026-04-26", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 33.99, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 137, "status": "aberta"}, {"desc": "Shopee *Enxovaismp", "data": "2026-04-27", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 74.8, "npar": 1, "parAtual": 1, "cat": "Casa", "id": 138, "status": "aberta"}, {"desc": "Uber", "data": "2026-04-27", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 33.55, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 139, "status": "aberta"}, {"desc": "Uber", "data": "2026-04-27", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 61.52, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 140, "status": "aberta"}, {"desc": "Shopee *Tricottrend", "data": "2026-04-27", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 53.26, "npar": 1, "parAtual": 1, "cat": "Vestuário", "id": 141, "status": "aberta"}, {"desc": "Grupo Madero", "data": "2026-04-27", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 86.9, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 142, "status": "aberta"}, {"desc": "Rappi*Moustache Beams", "data": "2026-04-28", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 48.66, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 143, "status": "aberta"}, {"desc": "Amazon BR", "data": "2026-04-28", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 35.44, "npar": 6, "parAtual": 1, "cat": "A definir", "id": 144, "status": "aberta"}, {"desc": "Master Supermercados", "data": "2026-04-29", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 307.3, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 145, "status": "aberta"}, {"desc": "Drogasil", "data": "2026-04-29", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 69.72, "npar": 1, "parAtual": 1, "cat": "Farmácia", "id": 146, "status": "aberta"}, {"desc": "IFD*Shopper Comercio", "data": "2026-04-29", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 76.3, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 147, "status": "aberta"}, {"desc": "Uber", "data": "2026-04-29", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 38.16, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 148, "status": "aberta"}, {"desc": "Uber", "data": "2026-04-29", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 27.78, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 149, "status": "aberta"}, {"desc": "Uber", "data": "2026-04-30", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 80.25, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 150, "status": "aberta"}, {"desc": "Apple.com/Bill", "data": "2026-04-30", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 66.9, "npar": 1, "parAtual": 1, "cat": "Assinatura", "id": 151, "status": "aberta"}, {"desc": "Clinica Karkoska", "data": "2026-04-30", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 500.0, "npar": 1, "parAtual": 1, "cat": "Saúde", "id": 152, "status": "aberta"}, {"desc": "Rappi*Moustache Beams", "data": "2026-04-30", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 28.27, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 153, "status": "aberta"}, {"desc": "Uber", "data": "2026-04-30", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 17.92, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 154, "status": "aberta"}, {"desc": "Yerba Mate Bar e Cafe", "data": "2026-04-30", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 36.0, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 155, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-01", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 14.84, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 156, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-01", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 21.15, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 157, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-01", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 17.47, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 158, "status": "aberta"}, {"desc": "Mercado Extra", "data": "2026-05-01", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 65.76, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 159, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-02", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 52.19, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 160, "status": "aberta"}, {"desc": "Rappi*Moustache Beams", "data": "2026-05-02", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 38.22, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 161, "status": "aberta"}, {"desc": "IFD*La Tartine", "data": "2026-05-02", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 197.99, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 162, "status": "aberta"}, {"desc": "IFD*Mineirao", "data": "2026-05-03", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 60.89, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 163, "status": "aberta"}, {"desc": "PG *Nuvem Maismu", "data": "2026-05-04", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 33.16, "npar": 3, "parAtual": 1, "cat": "Assinatura", "id": 164, "status": "aberta"}, {"desc": "Caveo Tecnologia", "data": "2026-05-04", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 73.5, "npar": 1, "parAtual": 1, "cat": "A definir", "id": 165, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-06", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 11.77, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 166, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-06", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 11.77, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 167, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-06", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 77.77, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 168, "status": "aberta"}, {"desc": "Tuna *Yooga", "data": "2026-05-06", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 143.0, "npar": 1, "parAtual": 1, "cat": "Saúde", "id": 169, "status": "aberta"}, {"desc": "IFD*Pao com Carne", "data": "2026-05-07", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 112.98, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 170, "status": "aberta"}, {"desc": "Rappi*Moustache Beams", "data": "2026-05-08", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 35.59, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 171, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-08", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 11.94, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 172, "status": "aberta"}, {"desc": "Loccitane Frei Caneca", "data": "2026-05-09", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 89.8, "npar": 1, "parAtual": 1, "cat": "Saúde", "id": 173, "status": "aberta"}, {"desc": "Master Supermercados", "data": "2026-05-09", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 37.9, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 174, "status": "aberta"}, {"desc": "Rappi*Goldorak", "data": "2026-05-09", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 2.9, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 175, "status": "aberta"}, {"desc": "Rappi*Goldorak", "data": "2026-05-09", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 76.84, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 176, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-09", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 4.35, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 177, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-09", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 75.99, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 178, "status": "aberta"}, {"desc": "Jet Printer", "data": "2026-05-09", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 10.0, "npar": 1, "parAtual": 1, "cat": "Casa", "id": 179, "status": "aberta"}, {"desc": "Keetabr*Wesley Vinicius", "data": "2026-05-09", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 89.59, "npar": 1, "parAtual": 1, "cat": "A definir", "id": 180, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-10", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 25.5, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 181, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-11", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 62.4, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 182, "status": "aberta"}, {"desc": "Uber", "data": "2026-05-11", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 54.55, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 183, "status": "aberta"}, {"desc": "Rappi*Moustache Beams", "data": "2026-05-11", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 24.86, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 184, "status": "aberta"}, {"desc": "Drogasil", "data": "2026-05-12", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 27.91, "npar": 1, "parAtual": 1, "cat": "Farmácia", "id": 185, "status": "aberta"}, {"desc": "GOL Linhas Aéreas", "data": "2026-05-12", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 163.31, "npar": 3, "parAtual": 1, "cat": "Viagens", "id": 186, "status": "aberta"}, {"desc": "Taxa de Embarque", "data": "2026-05-12", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 33.64, "npar": 1, "parAtual": 1, "cat": "Viagens", "id": 187, "status": "aberta"}, {"desc": "Mais Ok Mercadinho", "data": "2026-05-12", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 9.6, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 188, "status": "aberta"}, {"desc": "IFD*Ifood Club", "data": "2026-05-13", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 5.95, "npar": 1, "parAtual": 1, "cat": "Assinatura", "id": 189, "status": "aberta"}, {"desc": "Drogasil", "data": "2026-05-14", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 83.91, "npar": 1, "parAtual": 1, "cat": "Farmácia", "id": 190, "status": "aberta"}, {"desc": "Apple.com/Bill", "data": "2026-05-15", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 29.9, "npar": 1, "parAtual": 1, "cat": "Assinatura", "id": 191, "status": "aberta"}, {"desc": "Cinesesc", "data": "2026-05-15", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 11.0, "npar": 1, "parAtual": 1, "cat": "Lazer", "id": 192, "status": "aberta"}, {"desc": "Cinesesc", "data": "2026-05-15", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 15.0, "npar": 1, "parAtual": 1, "cat": "Lazer", "id": 193, "status": "aberta"}, {"desc": "CEA", "data": "2026-05-15", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 133.34, "npar": 3, "parAtual": 1, "cat": "Vestuário", "id": 194, "status": "aberta"}, {"desc": "IFD*Kome Restaurante", "data": "2026-05-16", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 29.73, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 195, "status": "aberta"}, {"desc": "Rappi", "data": "2026-05-17", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 24.9, "npar": 1, "parAtual": 1, "cat": "Uber", "id": 196, "status": "aberta"}, {"desc": "IFD*Kome Restaurante", "data": "2026-05-19", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 23.74, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 197, "status": "aberta"}, {"desc": "Mercado Extra", "data": "2026-05-19", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 180.98, "npar": 1, "parAtual": 1, "cat": "Alimentação", "id": 198, "status": "aberta"}, {"desc": "Apple.com/Bill", "data": "2026-05-20", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 14.99, "npar": 1, "parAtual": 1, "cat": "Assinatura", "id": 199, "status": "aberta"}, {"desc": "SP SPO Consolacao", "data": "2026-05-03", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 159.9, "npar": 1, "parAtual": 1, "cat": "A definir", "id": 200, "status": "aberta"}, {"desc": "LATAM Air", "data": "2026-05-08", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 361.86, "npar": 4, "parAtual": 1, "cat": "Viagens", "id": 201, "status": "aberta"}, {"desc": "Totalpass", "data": "2026-05-10", "comp": "2026-06", "cartao": "Itaú Priscila", "valor": 119.9, "npar": 1, "parAtual": 1, "cat": "Saúde", "id": 202, "status": "aberta"}, {"desc": "Mercadolivre*Ebaazar", "data": "2025-09-02", "comp": "2026-05", "cartao": "MP Priscila", "valor": 46.88, "npar": 10, "parAtual": 9, "cat": "A definir", "id": 203, "status": "aberta"}, {"desc": "Mercadolivre*Budcomerc", "data": "2025-09-15", "comp": "2026-05", "cartao": "MP Priscila", "valor": 122.45, "npar": 24, "parAtual": 8, "cat": "A definir", "id": 204, "status": "aberta"}, {"desc": "Mercadolivre*Ebaazar", "data": "2025-09-17", "comp": "2026-05", "cartao": "MP Priscila", "valor": 41.05, "npar": 18, "parAtual": 8, "cat": "A definir", "id": 205, "status": "aberta"}, {"desc": "Mercadolivre*Ebaazar", "data": "2025-09-18", "comp": "2026-05", "cartao": "MP Priscila", "valor": 36.94, "npar": 18, "parAtual": 8, "cat": "A definir", "id": 206, "status": "aberta"}, {"desc": "Mercadolivre*Mercadopesca", "data": "2025-09-19", "comp": "2026-05", "cartao": "MP Priscila", "valor": 135.24, "npar": 14, "parAtual": 8, "cat": "A definir", "id": 207, "status": "aberta"}, {"desc": "Mercadolivre*Vyle", "data": "2025-09-19", "comp": "2026-05", "cartao": "MP Priscila", "valor": 62.78, "npar": 14, "parAtual": 8, "cat": "A definir", "id": 208, "status": "aberta"}, {"desc": "Mercadolivre*Mercadolivre", "data": "2025-09-26", "comp": "2026-05", "cartao": "MP Priscila", "valor": 34.94, "npar": 18, "parAtual": 8, "cat": "A definir", "id": 209, "status": "aberta"}, {"desc": "Mercadolivre*2Produtos", "data": "2025-10-12", "comp": "2026-05", "cartao": "MP Priscila", "valor": 37.05, "npar": 8, "parAtual": 7, "cat": "A definir", "id": 210, "status": "aberta"}, {"desc": "Mercadolivre*Visionstore", "data": "2025-10-13", "comp": "2026-05", "cartao": "MP Priscila", "valor": 7.08, "npar": 12, "parAtual": 7, "cat": "A definir", "id": 211, "status": "aberta"}, {"desc": "Mercadolivre*Easytech", "data": "2025-11-03", "comp": "2026-05", "cartao": "MP Priscila", "valor": 36.61, "npar": 18, "parAtual": 7, "cat": "A definir", "id": 212, "status": "aberta"}, {"desc": "Mercadolivre*Mercadolivre", "data": "2025-11-28", "comp": "2026-05", "cartao": "MP Priscila", "valor": 54.16, "npar": 18, "parAtual": 6, "cat": "A definir", "id": 213, "status": "aberta"}, {"desc": "Mercadolivre*Tresmares", "data": "2026-03-10", "comp": "2026-05", "cartao": "MP Priscila", "valor": 23.29, "npar": 6, "parAtual": 2, "cat": "A definir", "id": 214, "status": "aberta"}, {"desc": "Mercadolivre*Mercadolivre", "data": "2026-03-21", "comp": "2026-05", "cartao": "MP Priscila", "valor": 24.64, "npar": 7, "parAtual": 2, "cat": "A definir", "id": 215, "status": "aberta"}, {"desc": "Mercadolivre*8Produtos", "data": "2026-03-22", "comp": "2026-05", "cartao": "MP Priscila", "valor": 39.98, "npar": 9, "parAtual": 2, "cat": "A definir", "id": 216, "status": "aberta"}, {"desc": "MP*Bavoomfabrica", "data": "2026-03-24", "comp": "2026-05", "cartao": "MP Priscila", "valor": 41.72, "npar": 4, "parAtual": 2, "cat": "A definir", "id": 217, "status": "aberta"}, {"desc": "Mercadolivre*Mercadoli", "data": "2026-04-01", "comp": "2026-05", "cartao": "MP Priscila", "valor": 17.97, "npar": 5, "parAtual": 2, "cat": "A definir", "id": 218, "status": "aberta"}, {"desc": "Mercadolivre*Mercadoli", "data": "2026-04-16", "comp": "2026-05", "cartao": "MP Priscila", "valor": 27.89, "npar": 1, "parAtual": 1, "cat": "A definir", "id": 219, "status": "aberta"}, {"desc": "Mercadolivre*Mercadolivre", "data": "2026-04-22", "comp": "2026-05", "cartao": "MP Priscila", "valor": 33.11, "npar": 1, "parAtual": 1, "cat": "A definir", "id": 220, "status": "aberta"}, {"desc": "Mercadolivre*Mercadolivre", "data": "2026-04-27", "comp": "2026-05", "cartao": "MP Priscila", "valor": 184.99, "npar": 1, "parAtual": 1, "cat": "A definir", "id": 221, "status": "aberta"}],
 };
@@ -1134,6 +1117,7 @@ function renderDashboard(){
 // ============================================================
 //  SALDOS
 // ============================================================
+function fmtK(v){if(!v||v===0)return"–";if(v>=1000)return"R$ "+(v/1000).toFixed(1).replace(".",",")+"k";return"R$ "+Math.round(v);}
 function renderSaldos(){
   const contas = db.saldos.filter(s=>s.cat==='conta');
   const invest = db.saldos.filter(s=>s.cat==='invest');
@@ -1186,13 +1170,8 @@ function renderSaldos(){
 //  CASAMENTO
 // ============================================================
 function renderCasamento(){
-  const catF=document.getElementById('cas-filter-cat')?.value||'';
   const stF=document.getElementById('cas-filter-status')?.value||'';
-  const cats=[...new Set(db.casamento.map(i=>i.cat))];
-  const catSel=document.getElementById('cas-filter-cat');
-  if(catSel&&catSel.options.length<=1) cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.text=c;catSel.appendChild(o);});
   let items=[...db.casamento];
-  if(catF) items=items.filter(i=>i.cat===catF);
   if(stF) items=items.filter(i=>i.status===stF);
 
   // Sort maior→menor pelo valor contratado (ou previsto se não contratado)
@@ -1200,7 +1179,6 @@ function renderCasamento(){
 
   const maxVal=Math.max(...items.map(i=>i.contratado||i.previsto||0),1);
 
-  function fmtK(v){if(v===0)return '–';return v>=1000?(v/1000).toFixed(v%1000===0?0:1).replace('.',',')+'k':String(Math.round(v));}
   function stClass(s){const m={'pago total':'st-pago-total','pago parcial':'st-pago-parcial','contratado':'st-contratado','previsto':'st-previsto','cancelado':'st-cancelado'};return m[s]||'st-previsto';}
 
   // ── Gráfico de barras horizontais ──
@@ -1265,7 +1243,7 @@ function renderCasamento(){
   // ── Legenda de cores ──
   const legendItems=[
     {bg:"var(--green)",label:"Pago total"},
-    {bg:"var(--blue)",label:"Pago (porção quitada)"},
+    {bg:"var(--blue)",label:"Pago"},
     {bg:"var(--amber)",label:"Em aberto"},
     {bg:"var(--slate-light)",label:"Previsto"},
   ];
@@ -1320,7 +1298,7 @@ function renderCasamento(){
     const isCur=m===todayYM;
     const color=v>10000?MCHART_COLORS.big:isCur?MCHART_COLORS.cur:MCHART_COLORS.fut;
     const h=v>0?Math.max(Math.round(v/maxMes*88),4):0;
-    const label=new Date(m+'-15').toLocaleDateString('pt-BR',{month:'short'}).replace('.','');
+    const label=fmtMes(m);
     return `<div class="cas-mchart-col">
       <div class="cas-mchart-val">${v>0?fmtK(v):''}</div>
       <div class="cas-mchart-bar" style="height:${h}px;background:${h>0?color:'transparent'};border-radius:3px 3px 0 0"></div>
@@ -1475,7 +1453,7 @@ function catSelectHtml(val,rowId){
   return `<select onchange="updateCompraCategoria('${rowId}',this.value)">${opts}</select>`;
 }
 
-function fmtMes(ym){if(!ym||ym==='–')return'–';const[y,m]=ym.split('-');const n=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];return(n[parseInt(m)-1]||m)+'/'+y.slice(2);}
+function fmtMes(ym){if(!ym||ym==='–')return'–';const[y,m]=ym.split('-');return m.padStart(2,'0')+'/'+y.slice(2);}
 
 function prevDetalhe(mes,cart){
   const parcelas=db.parcelas.filter(p=>p.comp===mes&&p.cartao===cart&&p.status==='aberta');
@@ -1489,6 +1467,7 @@ function prevDetalhe(mes,cart){
 }
 
 function renderCartoes(){
+  const todayYM=new Date().toISOString().slice(0,7);
   const cartSel=document.getElementById('cart-filter-nome');
   const mesSel=document.getElementById('cart-filter-mes');
   const nomeF=cartSel?.value||'';
@@ -1500,56 +1479,6 @@ function renderCartoes(){
   const allMonths=[...new Set(db.compras.map(c=>c.comp))].sort();
   if(mesSel&&mesSel.options.length<=1) allMonths.forEach(m=>{const o=document.createElement('option');o.value=m;o.text=m;mesSel.appendChild(o);});
 
-  // ── Gráfico de barras por mês ──
-  const CART_BAR_COLORS={};
-  const PALETTE=['#2563eb','#f97316','#16a34a','#7c3aed','#0891b2','#dc2626'];
-  db.cartoes.forEach((c,i)=>CART_BAR_COLORS[c.nome]=PALETTE[i%PALETTE.length]);
-
-  const chartMonths=allMonths.slice(-12); // últimos 12 meses com dados
-  const cartsForChart=nomeF?[nomeF]:db.cartoes.map(c=>c.nome);
-
-  // Para cada mês: total à vista e total parcelado (por cartão se filtrado)
-  const chartData=chartMonths.map(m=>{
-    let comprasM=db.compras.filter(c=>c.comp===m);
-    if(nomeF) comprasM=comprasM.filter(c=>c.cartao===nomeF);
-    const avista=comprasM.filter(c=>c.npar<=1).reduce((a,c)=>a+c.valor,0);
-    const parc=comprasM.filter(c=>c.npar>1).reduce((a,c)=>a+c.valor,0);
-    return {mes:m,avista,parc,total:avista+parc};
-  });
-  const maxBar=Math.max(...chartData.map(d=>d.total),1);
-  const todayYM=new Date().toISOString().slice(0,7);
-
-  const barsHtml=chartData.map(d=>{
-    const hTotal=Math.max(Math.round((d.total/maxBar)*110),d.total>0?4:0);
-    const hParc=d.total>0?Math.round((d.parc/d.total)*hTotal):0;
-    const hVista=hTotal-hParc;
-    const isCur=d.mes===todayYM;
-    const label=fmtMes(d.mes);
-    return `<div class="chart-bar-col" style="min-width:48px;flex:1;cursor:pointer" onclick="document.getElementById('cart-filter-mes').value='${d.mes}';renderCartoes()" title="${d.mes}: ${fmt(d.total)}">
-      <div style="font-size:.64rem;color:var(--slate);text-align:center;white-space:nowrap;margin-bottom:2px">${d.total>0?fmt(d.total):''}</div>
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:110px;width:100%">
-        ${d.total>0?`
-        <div style="width:70%;border-radius:4px 4px 0 0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
-          <div style="height:${hParc}px;background:#f97316;width:100%" title="Parcelado: ${fmt(d.parc)}"></div>
-          <div style="height:${hVista}px;background:#2563eb;width:100%" title="À vista: ${fmt(d.avista)}"></div>
-        </div>`:'<div style="width:70%;height:4px;background:var(--border);border-radius:99px"></div>'}
-      </div>
-      <div style="font-size:.68rem;color:${isCur?'var(--blue)':'var(--slate-light)'};font-weight:${isCur?700:400};text-align:center;margin-top:4px;white-space:nowrap">${label}${isCur?' ◀':''}</div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('cart-chart-wrap').innerHTML=`
-    <div style="padding:20px 24px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-        <div style="font-size:.875rem;font-weight:600;color:var(--text)">Total lançado por mês ${nomeF?'— '+nomeF:''}</div>
-        <div style="display:flex;gap:14px">
-          <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--slate)"><div style="width:12px;height:12px;border-radius:3px;background:#2563eb"></div>À vista</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--slate)"><div style="width:12px;height:12px;border-radius:3px;background:#f97316"></div>Parcelado</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:flex-end;gap:6px;height:150px;overflow-x:auto;padding-bottom:4px">${barsHtml||'<div style="color:var(--slate-light);font-size:.875rem">Nenhum lançamento</div>'}</div>
-      <div style="font-size:.7rem;color:var(--slate-light);margin-top:8px">Clique em uma barra para filtrar o mês</div>
-    </div>`;
 
   // ── Painel cartão ──
   const painelEl=document.getElementById('cart-painel');
@@ -1605,9 +1534,10 @@ function renderCartoes(){
         return `<div class="compra-group-title">${cat} <span style="float:right;font-size:.72rem;color:var(--slate)">${fmt(grpTotal)}</span></div>${rowsHtml}`;
       }).join('');
       const mid='m'+mes.replace(/\W/g,'');
+      const cartaoLabel=nomeF?` — ${nomeF}`:'';
       return `<div class="fatura-mes-wrap" id="fat-${mid}">
         <div class="fatura-mes-header" onclick="toggleFatura('${mid}')">
-          <span class="fatura-mes-titulo">📅 ${mes}</span>
+          <span class="fatura-mes-titulo">📅 ${mes}${cartaoLabel}</span>
           <span style="font-size:.75rem;color:var(--slate);margin-right:8px">${itens.length} lançamento${itens.length!==1?'s':''}</span>
           <span class="fatura-mes-total">${fmt(total)}</span>
           <span class="fatura-mes-toggle" id="tog-${mid}">▾</span>
@@ -1625,6 +1555,38 @@ function renderCartoes(){
     }).join('');
   }
 
+  // ── Faturas em aberto (Itaú Priscila, MP Priscila etc — sem lançamentos detalhados) ──
+  {
+    let fats=db.faturas.filter(f=>f.status!=='paga');
+    if(nomeF) fats=fats.filter(f=>f.cartao===nomeF||f.cartao.includes(nomeF));
+    // Só mostra cartões que NÃO têm compras detalhadas (evita duplicar Nubank Thiago)
+    const cartoesComCompras=[...new Set(db.compras.map(c=>c.cartao))];
+    fats=fats.filter(f=>!cartoesComCompras.includes(f.cartao));
+    if(fats.length){
+      fw.innerHTML+='<div style="margin-top:8px">'+fats.map(f=>{
+        const mid2='fat'+f.id;
+        return `<div class="fatura-mes-wrap" id="fatref-${mid2}">
+          <div class="fatura-mes-header" onclick="toggleFatura('${mid2}')">
+            <span class="fatura-mes-titulo">💳 ${f.cartao} — ${f.mes}</span>
+            <span style="font-size:.75rem;color:var(--slate);margin-right:8px">${statusBadge(f.status)}</span>
+            <span class="fatura-mes-total" style="color:var(--red)">${fmt(f.valor)}</span>
+            <span class="fatura-mes-toggle" id="tog-${mid2}">▾</span>
+          </div>
+          <div class="fatura-mes-body" id="bod-${mid2}">
+            <div style="padding:14px 18px;font-size:.82rem;color:var(--text2);line-height:1.7">
+              <div>💳 Cartão: <strong>${f.cartao}</strong></div>
+              <div>📅 Referência: <strong>${f.mes}</strong></div>
+              <div>📆 Vencimento: <strong>${fmtDate(f.venc)}</strong></div>
+              <div>💰 Valor: <strong style="color:var(--red)">${fmt(f.valor)}</strong></div>
+              ${f.obs?`<div style="margin-top:8px;font-size:.78rem;color:var(--slate);border-top:1px solid var(--border);padding-top:8px">${f.obs}</div>`:''}
+              <div style="margin-top:10px"><button class="btn btn-outline btn-sm" onclick="editFatura(${f.id})">✏️ Editar fatura</button></div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')+'</div>';
+    }
+  }
+
   // Cartões cadastrados
   document.getElementById('cart-body').innerHTML=db.cartoes.map(c=>`<tr>
     <td><strong>${c.nome}</strong></td><td>${c.titular}</td>
@@ -1633,71 +1595,110 @@ function renderCartoes(){
     <td><span class="edit-icon" onclick="editCartao(${c.id})">✏️</span></td></tr>`
   ).join('')||`<tr><td colspan="7" class="table-empty">Nenhum cartão</td></tr>`;
 
-  // ── Grade previsão mês × cartão ──
-  const anoSel=document.getElementById('prev-filter-ano')?.value||'2026';
-  const allOpen=db.parcelas.filter(p=>p.status==='aberta'&&p.comp.startsWith(anoSel));
-  const MESES_ANO=Array.from({length:12},(_,i)=>`${anoSel}-${String(i+1).padStart(2,'0')}`);
-  const CART_COLORS_PREV={'Nubank':'#8b5cf6','Itaú Thiago':'#f97316','Itaú':'#f97316'};
-  function cartColorPrev(nome){for(const [k,v] of Object.entries(CART_COLORS_PREV)) if(nome&&nome.includes(k)) return v; return '#64748b';}
+  // ── Gráfico de barras empilhadas por cartão ──
+  const CART_COLORS_PREV={
+    'Nubank Thiago (Black)':'#8b5cf6',
+    'Nubank Thiago':'#8b5cf6',
+    'Itaú Thiago':'#f97316',
+    'Itaú Priscila':'#ec4899',
+    'MP Priscila':'#0891b2',
+  };
+  function cartColorPrev(nome){
+    if(CART_COLORS_PREV[nome]) return CART_COLORS_PREV[nome];
+    for(const [k,v] of Object.entries(CART_COLORS_PREV)) if(nome&&nome.toUpperCase().includes(k.split(' ')[0].toUpperCase())) return v;
+    return '#64748b';
+  }
 
-  const byMesPrev={};
-  MESES_ANO.forEach(m=>{byMesPrev[m]={};});
-  allOpen.forEach(p=>{
-    const k=p.cartao||'–';
-    if(!byMesPrev[p.comp]) return;
-    if(!byMesPrev[p.comp][k]) byMesPrev[p.comp][k]={total:0,items:[]};
-    byMesPrev[p.comp][k].total+=p.valor;
-    byMesPrev[p.comp][k].items.push(p);
+  // Meses: mês atual + 11 meses à frente
+  const nMeses=12;
+  const today2=new Date();
+  const MESES_CHART=Array.from({length:nMeses},(_,k)=>{
+    const d=new Date(today2.getFullYear(),today2.getMonth()+k,1);
+    return d.toISOString().slice(0,7);
+  });
+  const mesSet=new Set(MESES_CHART);
+
+  // Aplica filtros de cartão e tipo ao gráfico
+  let comprasChart=db.compras;
+  if(nomeF) comprasChart=comprasChart.filter(c=>c.cartao===nomeF);
+  if(tipoF==="avista")    comprasChart=comprasChart.filter(c=>c.npar<=1);
+  if(tipoF==="parcelado") comprasChart=comprasChart.filter(c=>c.npar>1);
+
+  const cartsPresentes=[...new Set(comprasChart.map(c=>c.cartao).filter(Boolean))];
+
+  const byChart={};
+  MESES_CHART.forEach(m=>{byChart[m]={};cartsPresentes.forEach(c=>{byChart[m][c]=0;});});
+
+  comprasChart.forEach(c=>{
+    if(!c.cartao||!c.comp||!c.valor) return;
+    const cart=c.cartao;
+    const npar=c.npar||1;
+    const parAtual=c.parAtual||1;
+    const valor=c.valor;
+    const [ano,mes]=c.comp.split("-").map(Number);
+    if(npar<=1){
+      if(mesSet.has(c.comp)&&byChart[c.comp][cart]!==undefined) byChart[c.comp][cart]+=valor;
+    } else {
+      const parcRestantes=npar-parAtual+1;
+      for(let i=0;i<parcRestantes;i++){
+        const d=new Date(ano,mes-1+i,1);
+        const ym=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+        if(mesSet.has(ym)&&byChart[ym][cart]!==undefined) byChart[ym][cart]+=valor;
+      }
+    }
   });
 
-  const cartsUniqPrev=[...new Set(allOpen.map(p=>p.cartao).filter(Boolean))].sort();
-  const totalPorMesPrev=MESES_ANO.map(m=>Object.values(byMesPrev[m]).reduce((a,v)=>a+v.total,0));
-  const maxTotalPrev=Math.max(...totalPorMesPrev,1);
+  const totalPorMes=MESES_CHART.map(m=>cartsPresentes.reduce((a,c)=>a+(byChart[m][c]||0),0));
+  const maxTotal=Math.max(...totalPorMes,1);
+  const BAR_H=120;
 
-  const headHtml=`<tr>
-    <th style="min-width:150px">Cartão</th>
-    ${MESES_ANO.map(m=>{
-      const isCur=m===todayYM;const isPast=m<todayYM;
-      return `<th style="text-align:center;${isCur?'background:var(--blue-pale);':''}${isPast?'color:var(--slate-light);':''}">${fmtMes(m)}</th>`;
-    }).join('')}
-    <th style="text-align:right">Total</th>
-  </tr>`;
+  const barsChartHtml=MESES_CHART.map((m,k)=>{
+    const isCur=m===todayYM;
+    const isMesFiltrado=mesF&&m===mesF;
+    const isApagado=mesF&&m!==mesF;
+    const tot=totalPorMes[k];
+    const label=fmtMes(m);
+    let stackParts=[];
+    cartsPresentes.forEach(cart=>{
+      const v=byChart[m][cart]||0;
+      if(v<=0) return;
+      const h=Math.max(Math.round((v/maxTotal)*BAR_H),2);
+      const cor=cartColorPrev(cart);
+      stackParts.push({h,cor:isApagado?cor+"55":cor,label:cart+": "+fmt(v)});
+    });
+    const barHtml=stackParts.length
+      ?stackParts.map(p=>`<div style="width:100%;height:${p.h}px;background:${p.cor};flex-shrink:0" title="${p.label}"></div>`).reverse().join("")
+      :`<div style="height:2px;background:var(--border)"></div>`;
+    const valColor=tot>15000?"var(--red)":tot>8000?"var(--amber)":"var(--slate)";
+    const labelColor=isMesFiltrado?"var(--blue)":isCur?"var(--blue)":"var(--slate-light)";
+    const labelWeight=isMesFiltrado||isCur?700:400;
+    const bgCol=isMesFiltrado?"var(--blue-pale)":isCur?"var(--blue-pale)":"transparent";
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:0;flex:1;min-width:0;opacity:${isApagado?0.4:1}">
+      <div style="font-size:.6rem;color:${valColor};font-weight:${tot>8000?700:400};white-space:nowrap;text-align:center;height:16px;display:flex;align-items:center;justify-content:center">${tot>0?fmtK(tot):""}</div>
+      <div style="display:flex;flex-direction:column;justify-content:flex-end;width:75%;height:${BAR_H}px;background:${bgCol};border-radius:3px 3px 0 0;overflow:hidden">
+        <div style="display:flex;flex-direction:column;justify-content:flex-end;width:100%;height:100%;overflow:hidden;border-radius:3px 3px 0 0">${barHtml}</div>
+      </div>
+      <div style="font-size:.63rem;color:${labelColor};font-weight:${labelWeight};white-space:nowrap;text-align:center;margin-top:5px;line-height:1">${label}</div>
+    </div>`;
+  }).join("");
 
-  const cartRowsPrev=cartsUniqPrev.map(cart=>{
-    const cor=cartColorPrev(cart);
-    const totalCart=MESES_ANO.reduce((a,m)=>(byMesPrev[m][cart]?.total||0)+a,0);
-    const cells=MESES_ANO.map(m=>{
-      const v=byMesPrev[m][cart];
-      const isPast=m<todayYM;const isCur=m===todayYM;
-      if(!v||v.total===0) return `<td style="text-align:center;color:var(--border)">—</td>`;
-      return `<td style="text-align:center;background:${isCur?'var(--blue-pale)':''};cursor:pointer" onclick="prevDetalhe('${m}','${cart.replace(/'/g,"\\'")}')">
-        <div style="display:inline-block;border:1.5px solid ${cor};border-radius:6px;padding:4px 8px;min-width:64px;background:${cor}18">
-          <div style="font-size:.78rem;font-weight:700;color:${cor}">${fmt(v.total)}</div>
-          <div style="font-size:.65rem;color:var(--slate)">${v.items.length} parc.</div>
+  const legendHtml=cartsPresentes.map((c,i)=>
+    `<div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text2);font-weight:500"><div style="width:11px;height:11px;border-radius:2px;background:${cartColorPrev(c)};flex-shrink:0"></div>${c}</div>`
+  ).join("");
+
+  const chartEl=document.getElementById("cart-parcelas-chart-wrap");
+  if(chartEl){
+    chartEl.innerHTML=totalPorMes.some(v=>v>0)?
+      `<div style="padding:18px 22px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div style="font-size:.875rem;font-weight:600;color:var(--text)">📊 Previsão de gastos por cartão</div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap">${legendHtml}</div>
         </div>
-      </td>`;
-    }).join('');
-    return `<tr><td><span style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${cor};flex-shrink:0"></span><strong style="font-size:.82rem">${cart}</strong></span></td>${cells}<td style="text-align:right;font-weight:700">${totalCart>0?fmt(totalCart):'—'}</td></tr>`;
-  }).join('');
-
-  const totalRowPrev=`<tr style="background:var(--surface2);border-top:2px solid var(--border)">
-    <td><strong style="font-size:.8rem">TOTAL MÊS</strong></td>
-    ${MESES_ANO.map((m,i)=>{
-      const v=totalPorMesPrev[i];const isCur=m===todayYM;
-      if(v===0) return `<td style="text-align:center;color:var(--slate-light)">—</td>`;
-      const col=v>10000?'var(--red)':v>5000?'var(--amber)':'var(--green)';
-      const pct=Math.round(v/maxTotalPrev*100);
-      return `<td style="text-align:center;background:${isCur?'var(--blue-pale)':''}">
-        <div style="font-size:.78rem;font-weight:700;color:${col}">${fmt(v)}</div>
-        <div style="height:4px;background:var(--border);border-radius:99px;margin-top:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${col};border-radius:99px"></div></div>
-      </td>`;
-    }).join('')}
-    <td style="text-align:right;font-weight:700">${fmt(totalPorMesPrev.reduce((a,v)=>a+v,0))}</td>
-  </tr>`;
-
-  document.getElementById('prev-grade-head').innerHTML=headHtml;
-  document.getElementById('prev-grade-body').innerHTML=cartRowsPrev||`<tr><td colspan="14" class="table-empty">Nenhuma parcela aberta em ${anoSel}</td></tr>`;
-  document.getElementById('prev-grade-foot').innerHTML=totalRowPrev;
+        <div style="display:flex;align-items:flex-end;gap:4px;overflow:hidden">${barsChartHtml}</div>
+        <div style="font-size:.67rem;color:var(--slate-light);margin-top:6px">À vista: mês da fatura · Parcelado: distribuído parcela a parcela</div>
+      </div>`
+      :`<div class="table-empty">Nenhum lançamento em db.compras.</div>`;
+  }
 }
 
 function toggleFatura(mid){
@@ -1886,7 +1887,7 @@ function loadModalData(type,id){
   } else if(type==='casamento'){
     const i=db.casamento.find(x=>x.id===id); if(!i) return;
     document.getElementById('m-cas-title').textContent='Editar — '+i.fornecedor;
-    ['cat','fornecedor','pix','previsto','contratado','pago','parcelas','parcelasPagas','vparcela','venc','forma','cartao','resp','status','obs'].forEach(f=>{const el=document.getElementById('m-cas-'+f);if(el)el.value=i[f]||'';});
+    ['fornecedor','pix','previsto','contratado','pago','parcelas','parcelasPagas','vparcela','venc','obs'].forEach(f=>{const el=document.getElementById('m-cas-'+f);if(el)el.value=i[f]||'';});
     document.getElementById('m-cas-del').style.display='inline-block';
   } else if(type==='lua'){
     const i=db.lua.find(x=>x.id===id); if(!i) return;
@@ -1928,7 +1929,22 @@ function saveFatura(){
 function deleteFatura(){if(!editingId['fatura']||!confirm('Excluir esta fatura?'))return;db.faturas=db.faturas.filter(x=>x.id!==editingId['fatura']);saveData();closeModal('fatura');renderSaldos();}
 
 function saveCasamento(){
-  const item={id:editingId['casamento']||nextId(db.casamento),cat:document.getElementById('m-cas-cat').value,fornecedor:document.getElementById('m-cas-fornecedor').value||'Sem nome',pix:document.getElementById('m-cas-pix').value||'',previsto:parseFloat(document.getElementById('m-cas-previsto').value)||0,contratado:parseFloat(document.getElementById('m-cas-contratado').value)||0,pago:parseFloat(document.getElementById('m-cas-pago').value)||0,parcelas:parseInt(document.getElementById('m-cas-parcelas').value)||0,parcelasPagas:parseInt(document.getElementById('m-cas-parcelas-pagas').value)||0,vparcela:parseFloat(document.getElementById('m-cas-vparcela').value)||0,venc:document.getElementById('m-cas-venc').value,forma:document.getElementById('m-cas-forma').value,cartao:document.getElementById('m-cas-cartao').value,resp:document.getElementById('m-cas-resp').value,status:document.getElementById('m-cas-status').value,obs:document.getElementById('m-cas-obs').value};
+  const _prev=parseFloat(document.getElementById("m-cas-previsto").value)||0;
+  const _cont=parseFloat(document.getElementById("m-cas-contratado").value)||0;
+  const _pago=parseFloat(document.getElementById("m-cas-pago").value)||0;
+  const _parc=parseInt(document.getElementById("m-cas-parcelas").value)||0;
+  const _pagasP=parseInt(document.getElementById("m-cas-parcelas-pagas").value)||0;
+  const _vp=parseFloat(document.getElementById("m-cas-vparcela").value)||0;
+  // Status automático
+  let _status="previsto";
+  if(_cont>0){
+    if(_pago>=_cont) _status="pago total";
+    else if(_pago>0) _status="pago parcial";
+    else _status="contratado";
+  }
+  // Preserva cat/forma/cartao/resp do item existente (se edição) ou usa padrão
+  const _existing=editingId["casamento"]?db.casamento.find(x=>x.id===editingId["casamento"]):null;
+  const item={id:editingId["casamento"]||nextId(db.casamento),cat:_existing?.cat||"Outros",fornecedor:document.getElementById("m-cas-fornecedor").value||"Sem nome",pix:document.getElementById("m-cas-pix").value||"",previsto:_prev,contratado:_cont,pago:_pago,parcelas:_parc,parcelasPagas:_pagasP,vparcela:_vp,venc:document.getElementById("m-cas-venc").value,forma:"PIX",cartao:_existing?.cartao||"",resp:_existing?.resp||"Ambos",status:_status,obs:document.getElementById("m-cas-obs").value};
   if(editingId['casamento']){const idx=db.casamento.findIndex(x=>x.id===editingId['casamento']);db.casamento[idx]=item;}else db.casamento.push(item);
   saveData();closeModal('casamento');renderCasamento();
 }
