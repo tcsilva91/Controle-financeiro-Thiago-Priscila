@@ -6,13 +6,24 @@
 <title>Finanças — Thiago & Priscila</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:#f4f6f9;--surface:#fff;--surface2:#f0f3f7;--border:#e2e8f0;
-    --blue-dark:#1e3a5f;--blue:#2563eb;--blue-mid:#3b82f6;--blue-light:#dbeafe;--blue-pale:#eff6ff;
-    --slate:#64748b;--slate-light:#94a3b8;--text:#1e293b;--text2:#475569;
-    --green:#16a34a;--green-bg:#dcfce7;--amber:#d97706;--amber-bg:#fef3c7;--red:#dc2626;--red-bg:#fee2e2;
+:root {
+    /* Backgrounds — creme suave */
+    --bg:#f7f5f2;--surface:#fff;--surface2:#f0eee9;--border:#dedad3;
+
+    /* Estrutura — cinza-ardósia azulado (sidebar, painéis, títulos) */
+    --blue-dark:#2d3748;--blue:#C55900;--blue-mid:#DC6700;--blue-light:#fde8d4;--blue-pale:#fef6ee;
+
+    /* Texto — escala neutra levemente quente */
+    --slate:#5a6475;--slate-light:#9aa3b0;--text:#1a202c;--text2:#4a5568;
+
+    /* Semânticas */
+    --green:#276749;--green-bg:#d4edda;
+    --amber:#b85c00;--amber-bg:#fdebd0;
+    --red:#c0392b;--red-bg:#fde8e6;
+
+    /* Sombras */
     --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
-    --shadow:0 4px 16px rgba(0,0,0,.07);--shadow-lg:0 8px 32px rgba(0,0,0,.1);
+    --shadow:0 4px 16px rgba(0,0,0,.08);--shadow-lg:0 8px 32px rgba(0,0,0,.12);
     --radius:12px;--radius-sm:8px;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -20,11 +31,11 @@
   .sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;background:var(--blue-dark);display:flex;flex-direction:column;z-index:100;transition:transform .3s ease;}
   .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
   .sidebar-logo h1{font-family:'DM Serif Display',serif;font-size:1.15rem;color:#fff;line-height:1.3;}
-  .sidebar-logo span{color:#93c5fd;font-style:italic;font-size:.85rem;display:block;margin-top:2px;}
+  .sidebar-logo span{color:#a8b4c4;font-style:italic;font-size:.85rem;display:block;margin-top:2px;}
   .sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:2px;}
   .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);color:rgba(255,255,255,.65);cursor:pointer;font-size:.875rem;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
   .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-  .nav-item.active{background:rgba(37,99,235,.6);color:#fff;}
+  .nav-item.active{background:rgba(197,89,0,.55);color:#fff;}
   .nav-item .icon{font-size:1rem;width:20px;text-align:center;}
   .sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,.1);}
   .sync-info{font-size:.75rem;color:rgba(255,255,255,.4);text-align:center;line-height:1.5;}
@@ -33,7 +44,7 @@
   .topbar-title{font-size:1.1rem;font-weight:600;color:var(--text);}
   .topbar-actions{display:flex;gap:8px;}
   .btn{padding:8px 16px;border-radius:var(--radius-sm);font-size:.8125rem;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif;}
-  .btn-primary{background:var(--blue);color:#fff;} .btn-primary:hover{background:#1d4ed8;}
+  .btn-primary{background:var(--blue);color:#fff;} .btn-primary:hover{background:#9C4600;}
   .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2);} .btn-outline:hover{background:var(--surface2);}
   .btn-sm{padding:5px 10px;font-size:.75rem;}
   .btn-danger{background:var(--red-bg);color:var(--red);}
@@ -247,7 +258,7 @@
   .badge-pago{background:#dcfce7;color:#15803d;}
   .badge-pago-parcial,.badge-pago\ parcial{background:#fef3c7;color:#b45309;}
   .badge-em-aberto{background:#fee2e2;color:#b91c1c;}
-  .badge-contratado{background:#dbeafe;color:#1d4ed8;}
+  .badge-contratado{background:#e8ecf0;color:#2d3748;}
   .badge-reservado{background:#ede9fe;color:#6d28d9;}
   .badge-a-reservar{background:#f0fdf4;color:#15803d;}
   .badge-a-confirmar{background:#f1f5f9;color:#475569;}
@@ -445,6 +456,7 @@
           <option value="parcelado">Somente parcelado</option>
         </select>
         <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="limparFiltrosCartoes()" title="Limpar filtros">✕ Limpar</button>
           <button class="btn btn-primary btn-sm" onclick="openModal('cartao')">+ Cartão</button>
           <button class="btn btn-outline btn-sm" onclick="openModalCompra()">+ Lançar compra</button>
           <label class="btn btn-outline btn-sm" style="cursor:pointer" title="Importar CSV Nubank">📥 CSV <input type="file" accept=".csv" style="display:none" onchange="importCSV(event)"></label>
@@ -970,7 +982,7 @@ function renderDashboard(){
   const execCards=[
     {label:'Previsto total',icon:'📋',value:fmt(totPrev),sub:'Casamento + Lua de Mel',pct:null,bar:null,color:'blue',
      tip:'Soma de todos os valores estimados no orçamento, mesmo sem fornecedor definido.'},
-    {label:'Contratado',icon:'📝',value:fmt(totCont),sub:`${pctCont}% do previsto`,pct:pctCont,barColor:'#2563eb',bar:pctCont,color:'blue',
+    {label:'Contratado',icon:'📝',value:fmt(totCont),sub:`${pctCont}% do previsto`,pct:pctCont,barColor:'#4a5568',bar:pctCont,color:'blue',
      tip:'Valores já negociados, reservados ou formalizados com fornecedores.'},
     {label:'Pago',icon:'✅',value:fmt(totPago),sub:`${pctPago}% do contratado`,pct:pctPago,barColor:'#16a34a',bar:pctPago,color:'green',
      tip:'Soma dos valores já quitados até hoje.'},
@@ -1057,7 +1069,7 @@ function renderDashboard(){
   const byResp={Thiago:0,Priscila:0,Ambos:0};
   all.forEach(i=>{const k=i.resp||'Ambos';byResp[k]=(byResp[k]||0)+(i.contratado||i.previsto||0);});
   const maxResp=Math.max(...Object.values(byResp),1);
-  const RESP_COLORS={Thiago:'#2563eb',Priscila:'#7c3aed',Ambos:'#16a34a'};
+  const RESP_COLORS={Thiago:'#2d3748',Priscila:'#C55900',Ambos:'#5a6475'};
   document.getElementById('dist-resp-wrap').innerHTML=Object.entries(byResp).map(([k,v])=>`
     <div class="dist-row">
       <div class="dist-label">${k}</div>
@@ -1068,7 +1080,7 @@ function renderDashboard(){
   const byCart={};
   all.forEach(i=>{const k=i.cartao||'A definir';byCart[k]=(byCart[k]||0)+(i.contratado||i.previsto||0);});
   const maxCart=Math.max(...Object.values(byCart),1);
-  const CART_COLORS_D=['#2563eb','#16a34a','#7c3aed','#d97706','#64748b'];
+  const CART_COLORS_D=['#DC6700','#4a6fa5','#276749','#b85c00','#5a6475'];
   document.getElementById('dist-cart-wrap').innerHTML=Object.entries(byCart).sort((a,b)=>b[1]-a[1]).map(([k,v],i)=>`
     <div class="dist-row">
       <div class="dist-label" style="font-size:.72rem">${k}</div>
@@ -1289,8 +1301,8 @@ function renderCasamento(){
   const vals=meses.map(m=>byMes[m]);
   const maxMes=Math.max(...vals,1);
   const MCHART_COLORS={
-    cur:'#2563eb',
-    fut:'#93c5fd',
+    cur:'#2d3748',
+    fut:'#a8b4c4',
     big:'#dc2626',
   };
   const barsHtml=meses.map((m,k)=>{
@@ -1466,6 +1478,15 @@ function prevDetalhe(mes,cart){
   wrap.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+function limparFiltrosCartoes(){
+  const n=document.getElementById("cart-filter-nome");
+  const m=document.getElementById("cart-filter-mes");
+  const t=document.getElementById("cart-filter-tipo");
+  if(n) n.value="";
+  if(m) m.value="";
+  if(t) t.value="";
+  renderCartoes();
+}
 function renderCartoes(){
   const todayYM=new Date().toISOString().slice(0,7);
   const cartSel=document.getElementById('cart-filter-nome');
@@ -1597,11 +1618,11 @@ function renderCartoes(){
 
   // ── Gráfico de barras empilhadas por cartão ──
   const CART_COLORS_PREV={
-    'Nubank Thiago (Black)':'#8b5cf6',
-    'Nubank Thiago':'#8b5cf6',
-    'Itaú Thiago':'#f97316',
-    'Itaú Priscila':'#ec4899',
-    'MP Priscila':'#0891b2',
+    'Nubank Thiago (Black)':'#DC6700',
+    'Nubank Thiago':'#DC6700',
+    'Itaú Thiago':'#4a6fa5',
+    'Itaú Priscila':'#276749',
+    'MP Priscila':'#5a6475',
   };
   function cartColorPrev(nome){
     if(CART_COLORS_PREV[nome]) return CART_COLORS_PREV[nome];
