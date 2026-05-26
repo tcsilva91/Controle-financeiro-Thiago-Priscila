@@ -270,6 +270,53 @@
   .chart-legend-item{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--slate);}
   .chart-legend-dot{width:10px;height:10px;border-radius:50%;}
 
+  /* CASAMENTO CHART */
+  .cas-chart-wrap{padding:20px 22px 12px;}
+  .cas-row{display:grid;grid-template-columns:158px 1fr auto;align-items:center;gap:10px;margin-bottom:6px;}
+  .cas-row:last-child{margin-bottom:0;}
+  .cas-row-label{font-size:.76rem;font-weight:500;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;}
+  .cas-bar-track{position:relative;height:24px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+  .cas-bar-fill{position:absolute;left:0;top:0;height:100%;border-radius:4px;transition:width .55s ease;}
+  .cas-bar-fill.st-pago-total{background:var(--green);}
+  .cas-bar-fill.st-pago-parcial{background:var(--blue);}
+  .cas-bar-fill.st-contratado{background:var(--amber);}
+  .cas-bar-fill.st-previsto{background:var(--slate-light);opacity:.38;}
+  .cas-bar-fill.st-cancelado{background:var(--border);}
+  .cas-bar-inner{position:absolute;inset:0;display:flex;align-items:center;padding:0 8px;gap:8px;pointer-events:none;}
+  .cas-bar-val{font-size:.7rem;font-weight:700;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.3);}
+  .cas-bar-parc{font-size:.63rem;color:rgba(255,255,255,.88);white-space:nowrap;}
+  .cas-bar-pct{font-size:.62rem;color:rgba(255,255,255,.7);white-space:nowrap;margin-left:auto;}
+  .cas-bar-meta{display:flex;align-items:center;gap:4px;flex-shrink:0;width:52px;justify-content:flex-end;}
+  .btn-pix-icon{width:22px;height:22px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.72rem;transition:all .15s;flex-shrink:0;padding:0;line-height:1;}
+  .btn-pix-icon.has-pix{background:var(--green-bg);color:var(--green);}
+  .btn-pix-icon.has-pix:hover{background:var(--green);color:#fff;transform:scale(1.18);}
+  .btn-pix-icon.has-pix.copiado{background:var(--green);color:#fff;}
+  .btn-pix-icon.no-pix{background:var(--surface2);color:var(--border);cursor:default;}
+  .cas-edit-btn{opacity:0;font-size:.75rem;cursor:pointer;transition:opacity .15s;background:none;border:none;padding:2px;color:var(--slate);}
+  .cas-row:hover .cas-edit-btn{opacity:.7;}
+  .cas-legend{display:flex;gap:14px;flex-wrap:wrap;padding:0 22px 14px;}
+  .cas-legend-item{display:flex;align-items:center;gap:5px;font-size:.71rem;color:var(--slate);}
+  .cas-legend-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+  .cas-mchart-section{padding:18px 22px 14px;border-top:1px solid var(--border);}
+  .cas-mchart-title{font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:14px;}
+  .cas-mchart-bars{display:flex;align-items:flex-end;gap:5px;height:100px;}
+  .cas-mchart-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:0;}
+  .cas-mchart-val{font-size:.59rem;color:var(--slate);text-align:center;line-height:1.1;height:14px;display:flex;align-items:center;justify-content:center;white-space:nowrap;}
+  .cas-mchart-bar{width:100%;border-radius:3px 3px 0 0;cursor:default;}
+  .cas-mchart-label{font-size:.63rem;color:var(--slate-light);white-space:nowrap;text-align:center;margin-top:3px;}
+  .cas-mchart-label.cur{color:var(--blue);font-weight:700;}
+
+  /* LUA INLINE EDIT */
+  .lua-inline-text{display:inline-block;border-radius:4px;padding:1px 4px;cursor:default;transition:background .1s;}
+  .lua-inline-text:hover{background:var(--blue-pale);cursor:text;}
+  .lua-inline-input{border:1.5px solid var(--blue-mid);border-radius:4px;padding:2px 6px;font-size:.82rem;font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);outline:none;width:100%;min-width:60px;}
+  .lua-inline-select{border:1.5px solid var(--blue-mid);border-radius:4px;padding:2px 4px;font-size:.78rem;font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);outline:none;}
+  /* PIX */
+  .pend-pix{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap;}
+  .pix-key{font-size:.78rem;color:var(--slate);font-family:monospace;background:var(--surface2);padding:2px 8px;border-radius:4px;border:1px solid var(--border);}
+  .btn-copiar-pix{background:var(--green-bg);color:var(--green);border:1px solid var(--green);border-radius:6px;padding:3px 10px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+  .btn-copiar-pix:hover{background:var(--green);color:#fff;}
+  .btn-copiar-pix.copiado{background:var(--green);color:#fff;}
   @media(max-width:768px){
     .sidebar{transform:translateX(-100%);}
     .sidebar.open{transform:translateX(0);}
@@ -348,10 +395,11 @@
             <button class="btn btn-primary btn-sm" onclick="openModal('casamento')">+ Adicionar</button>
           </div>
         </div>
-        <div style="overflow-x:auto">
-          <table><thead><tr><th>Categoria</th><th>Fornecedor</th><th>Previsto</th><th>Contratado</th><th>Pago</th><th>Em aberto</th><th>Parcelas</th><th>Cartão</th><th>Resp.</th><th>Status</th><th></th></tr></thead>
-          <tbody id="cas-body"></tbody>
-          <tfoot><tr class="totals-row" id="cas-totals"></tr></tfoot></table>
+        <div id="cas-body-wrap">
+          <div id="cas-body" class="cas-chart-wrap"></div>
+          <div id="cas-legend" class="cas-legend"></div>
+          <div id="cas-month-chart" class="cas-mchart-section"></div>
+          <div id="cas-totals" style="display:flex;gap:24px;padding:11px 22px;border-top:1px solid var(--border);font-size:.81rem;font-weight:600;color:var(--text);background:var(--surface2);border-radius:0 0 var(--radius) var(--radius);flex-wrap:wrap"></div>
         </div>
       </div>
     </div>
@@ -360,7 +408,6 @@
     <div class="tab-pane" id="tab-lua-de-mel">
       <div class="page-header">
         <h2 class="section-title">✈️ Lua de Mel — Itália, Set/2026</h2>
-        <p>Fortaleza 12/set → GRU 13/set → Veneza 15/set · Cortina 15–18/set · Ortisei 18–22/set · Veneza 22–24/set · Retorno 25/set</p>
       </div>
       <div class="alert alert-blue"><span>ℹ️</span><div>Orçamento ref: <strong>R$ 32.000</strong> · Comprometido até agora: <strong id="lua-comprometido">–</strong> · Ainda a comprometer: <strong id="lua-falta">–</strong></div></div>
       <div class="cards-grid" id="lua-cards"></div>
@@ -374,7 +421,7 @@
           </div>
         </div>
         <div style="overflow-x:auto">
-          <table><thead><tr><th>Categoria</th><th>Item</th><th>Período</th><th>Previsto</th><th>Contratado</th><th>Pago</th><th>Em aberto</th><th>Parcelas</th><th>Cartão</th><th>Status</th><th></th></tr></thead>
+          <table id="lua-table"><thead><tr><th>Item</th><th>Categoria</th><th>Início</th><th>Término</th><th>Previsto</th><th>Contratado</th><th>Parcelas quitadas</th><th>Valor parcela</th><th>Status</th><th></th></tr></thead>
           <tbody id="lua-body"></tbody>
           <tfoot><tr class="totals-row" id="lua-totals"></tr></tfoot></table>
         </div>
@@ -458,6 +505,10 @@
     <div class="tab-pane" id="tab-acoes">
       <div class="page-header"><h2 class="section-title">✅ Ações Pendentes</h2><p>Tarefas e pendências do casal</p></div>
       <div class="cards-grid" id="acoes-cards"></div>
+      <div class="table-wrap section-gap" style="margin-bottom:20px">
+        <div class="table-header"><span class="table-header-title">💸 Pagamentos pendentes — PIX copiável</span></div>
+        <div style="padding:16px 20px" id="acoes-pix-pend"></div>
+      </div>
       <div class="table-wrap section-gap">
         <div class="table-header">
           <span class="table-header-title">Lista de ações</span>
@@ -532,10 +583,12 @@
       <div class="field"><label>Valor contratado (R$)</label><input id="m-cas-contratado" type="number" step="0.01"></div>
       <div class="field"><label>Valor pago (R$)</label><input id="m-cas-pago" type="number" step="0.01"></div>
       <div class="field"><label>Nº parcelas</label><input id="m-cas-parcelas" type="number"></div>
+      <div class="field"><label>Parcelas pagas</label><input id="m-cas-parcelas-pagas" type="number" min="0" placeholder="Quantas já foram pagas"></div>
       <div class="field"><label>Valor da parcela (R$)</label><input id="m-cas-vparcela" type="number" step="0.01"></div>
       <div class="field"><label>Vencimento próxima parcela</label><input id="m-cas-venc" type="date"></div>
       <div class="field"><label>Forma de pagamento</label><select id="m-cas-forma"><option>Crédito</option><option>Débito</option><option>PIX</option><option>Boleto</option><option>Dinheiro</option></select></div>
       <div class="field"><label>Cartão / Conta</label><input id="m-cas-cartao" placeholder="Ex: Nubank Thiago"></div>
+      <div class="field full"><label>Chave PIX do fornecedor</label><input id="m-cas-pix" placeholder="CPF, CNPJ, e-mail ou celular"></div>
       <div class="field"><label>Responsável</label><select id="m-cas-resp"><option>Thiago</option><option>Priscila</option><option>Ambos</option></select></div>
       <div class="field"><label>Status</label><select id="m-cas-status"><option>previsto</option><option>contratado</option><option>pago parcial</option><option>pago total</option><option>cancelado</option></select></div>
       <div class="field full"><label>Observações</label><textarea id="m-cas-obs"></textarea></div>
@@ -721,25 +774,25 @@ const defaultData = {
     {id:4,cartao:'Itaú Thiago',mes:'2026-06',valor:1893.35,venc:'2026-07-03',status:'em aberto',obs:'Jun/26: saldo líquido após reembolso de passagem'},
   ],
   casamento: [
-    {id:1,cat:'Espaço / buffet',fornecedor:'Chalés Taíba (Local)',previsto:20000,contratado:20000,pago:20000,parcelas:5,vparcela:3333.20,venc:'',forma:'PIX/Transferência',cartao:'A confirmar',resp:'Ambos',status:'pago total',obs:'Local do casamento. R$3.334 (jun/25) + 4x R$3.333 (ago/25,out/25,dez/25,fev/26). Tudo pago.'},
-    {id:2,cat:'Espaço / buffet',fornecedor:'Buffet Castelli',previsto:19950,contratado:19950,pago:1640,parcelas:2,vparcela:0,venc:'2026-08-01',forma:'Crédito',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'Entrada R$1.640 paga (mar/26). Final R$18.310 em ago/26 (pendente).'},
-    {id:3,cat:'Cerimonial',fornecedor:'2Planner',previsto:5700,contratado:5700,pago:5035,parcelas:12,vparcela:332.50,venc:'2026-06-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'Entrada R$1.710 (jul/25) + 12x R$332,50 (ago/25–jul/26). Pago até mai/26. Aberto: jun/26 R$332,50 + jul/26 R$332,50.'},
-    {id:4,cat:'Decoração',fornecedor:'Araújo Decoração (Anderson)',previsto:15600,contratado:15600,pago:11232,parcelas:5,vparcela:2184,venc:'2026-06-01',forma:'Crédito',cartao:'A confirmar',resp:'Priscila',status:'pago parcial',obs:'Entrada R$4.680 (mar/26) + 5x R$2.184. Pagas: mar,abr,mai. Abertas: jun R$2.184 + jul R$2.184.'},
-    {id:5,cat:'Fotografia e vídeo',fornecedor:'Alta Foto e Vídeo (Renato)',previsto:4000,contratado:4000,pago:2650,parcelas:5,vparcela:450,venc:'2026-06-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'Entrada R$1.750 (mar/26) + 5x R$450. Pagas: mar,abr,mai. Abertas: jun R$450 + jul R$450.'},
-    {id:6,cat:'Espaço / buffet',fornecedor:'Carol Doces e Bem Casados',previsto:4570,contratado:4570,pago:2368,parcelas:5,vparcela:734,venc:'2026-06-01',forma:'PIX',cartao:'A confirmar',resp:'Priscila',status:'pago parcial',obs:'Entrada R$900 (mar/26) + 5x R$734. Pagas: mar,abr,mai. Abertas: jun R$734 + jul R$734.'},
-    {id:7,cat:'Decoração',fornecedor:'Vineyard Locação Mesas',previsto:3500,contratado:3500,pago:1750,parcelas:2,vparcela:1750,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'2x R$1.750: 1ª paga (mar/26), 2ª em ago/26 (pendente).'},
-    {id:8,cat:'Espaço / buffet',fornecedor:'Trinken Coquetel',previsto:4100,contratado:4100,pago:2378,parcelas:5,vparcela:574,venc:'2026-06-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'Entrada R$1.230 (mar/26) + 5x R$574. Pagas: mar,abr,mai. Abertas: jun R$574 + jul R$574.'},
-    {id:9,cat:'Espaço / buffet',fornecedor:'Romildo Bolo',previsto:1250,contratado:1250,pago:625,parcelas:2,vparcela:625,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Priscila',status:'pago parcial',obs:'2x R$625: 1ª paga (mar/26), 2ª em ago/26 (pendente). Pendente resposta sobre frutas.'},
-    {id:10,cat:'Decoração',fornecedor:'Cocos',previsto:654,contratado:654,pago:654,parcelas:1,vparcela:654,venc:'',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago total',obs:'Pago. R$654.'},
-    {id:11,cat:'Taxas extras',fornecedor:'Gerador',previsto:2630,contratado:2630,pago:0,parcelas:2,vparcela:0,venc:'2026-05-01',forma:'PIX',cartao:'A confirmar',resp:'Thiago',status:'contratado',obs:'R$750 em mai/26 (PENDENTE) + R$1.880 em ago/26. Pedir contrato, assinar e pagar.'},
-    {id:12,cat:'Música / banda / DJ',fornecedor:'Locomotiva Banda',previsto:11000,contratado:11000,pago:5500,parcelas:2,vparcela:5500,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Thiago',status:'pago parcial',obs:'2x R$5.500: mai/26 pago. ago/26 pendente. Pendente: agendar reunião, pedir contrato.'},
-    {id:13,cat:'Espaço / buffet',fornecedor:'Balcão Bar',previsto:900,contratado:900,pago:450,parcelas:2,vparcela:450,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'2x R$450: mai/26 pago. ago/26 pendente.'},
-    {id:14,cat:'Beleza da noiva',fornecedor:'Cabelo e Maquiagem',previsto:3000,contratado:3000,pago:900,parcelas:2,vparcela:0,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Priscila',status:'pago parcial',obs:'R$900 (abr/26 pago) + R$2.100 (ago/26 pendente).'},
-    {id:15,cat:'Espaço / buffet',fornecedor:'Chopp',previsto:1000,contratado:1000,pago:0,parcelas:4,vparcela:233.33,venc:'2026-05-01',forma:'PIX',cartao:'A confirmar',resp:'Thiago',status:'contratado',obs:'Entrada R$300 (mai/26 PENDENTE) + 3x R$233,33 (jun,jul,ago). Aguardando orçamento Jarllan.'},
-    {id:16,cat:'Música / banda / DJ',fornecedor:'DJ',previsto:3000,contratado:3000,pago:0,parcelas:4,vparcela:0,venc:'2026-05-01',forma:'PIX',cartao:'A confirmar',resp:'Thiago',status:'contratado',obs:'Entrada R$1.500 (mai/26 PENDENTE) + 3x R$500 (jun,jul,ago). Aguardando orçamento Jarllan.'},
-    {id:17,cat:'Taxas extras',fornecedor:'Seguranças',previsto:870,contratado:870,pago:0,parcelas:2,vparcela:435,venc:'2026-05-01',forma:'PIX',cartao:'A confirmar',resp:'Thiago',status:'contratado',obs:'R$435 (mai/26 PENDENTE) + R$435 (ago/26).'},
-    {id:18,cat:'Espaço / buffet',fornecedor:'Refeição Fornecedores',previsto:3237.50,contratado:3237.50,pago:0,parcelas:1,vparcela:3237.50,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'contratado',obs:'Pagamento único em ago/26.'},
-    {id:19,cat:'Viagem casamento',fornecedor:'Latam Air (FOR↔GRU)',previsto:1500,contratado:1500,pago:0,parcelas:0,vparcela:0,venc:'',forma:'Crédito',cartao:'Nubank Thiago',resp:'Ambos',status:'contratado',obs:'Voos FOR→GRU 13/set e retorno. Latam R$499,19 à vista + R$302,51 em 4x. Detalhes a confirmar.'},
+    {id:1,cat:'Espaço / buffet',fornecedor:'Chalés Taíba (Local)',pix:'analrizzato@gmail.com',previsto:20000,contratado:20000,pago:20000,parcelas:5,parcelasPagas:5,vparcela:3333.20,venc:'',forma:'PIX/Transferência',cartao:'A confirmar',resp:'Ambos',status:'pago total',obs:'Local do casamento. R$3.334 (jun/25) + 4x R$3.333 (ago/25,out/25,dez/25,fev/26). Tudo pago.'},
+    {id:2,cat:'Espaço / buffet',fornecedor:'Buffet Castelli',pix:'53.046.046/0001-08',previsto:19950,contratado:19950,pago:1640,parcelas:2,parcelasPagas:1,vparcela:0,venc:'2026-08-01',forma:'Crédito',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'Entrada R$1.640 paga (mar/26). Final R$18.310 em ago/26 (pendente).'},
+    {id:3,cat:'Cerimonial',fornecedor:'2Planner',pix:'26.577.979/0001-59',previsto:5700,contratado:5700,pago:5035,parcelas:12,parcelasPagas:10,vparcela:332.50,venc:'2026-06-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'Entrada R$1.710 (jul/25) + 12x R$332,50 (ago/25–jul/26). Pago até mai/26. Aberto: jun/26 R$332,50 + jul/26 R$332,50.'},
+    {id:4,cat:'Decoração',fornecedor:'Araújo Decoração (Anderson)',pix:'55694649000141',previsto:15600,contratado:15600,pago:11232,parcelas:5,parcelasPagas:3,vparcela:2184,venc:'2026-06-01',forma:'Crédito',cartao:'A confirmar',resp:'Priscila',status:'pago parcial',obs:'Entrada R$4.680 (mar/26) + 5x R$2.184. Pagas: mar,abr,mai. Abertas: jun R$2.184 + jul R$2.184.'},
+    {id:5,cat:'Fotografia e vídeo',fornecedor:'Alta Foto e Vídeo (Renato)',pix:'85991306345',previsto:4000,contratado:4000,pago:2650,parcelas:5,parcelasPagas:3,vparcela:450,venc:'2026-06-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'Entrada R$1.750 (mar/26) + 5x R$450. Pagas: mar,abr,mai. Abertas: jun R$450 + jul R$450.'},
+    {id:6,cat:'Espaço / buffet',fornecedor:'Carol Doces e Bem Casados',pix:'07.090.946/0001-35',previsto:4570,contratado:4570,pago:2368,parcelas:5,parcelasPagas:3,vparcela:734,venc:'2026-06-01',forma:'PIX',cartao:'A confirmar',resp:'Priscila',status:'pago parcial',obs:'Entrada R$900 (mar/26) + 5x R$734. Pagas: mar,abr,mai. Abertas: jun R$734 + jul R$734.'},
+    {id:7,cat:'Decoração',fornecedor:'Vineyard Locação Mesas',pix:'30820402000101',previsto:3500,contratado:3500,pago:1750,parcelas:2,parcelasPagas:1,vparcela:1750,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'2x R$1.750: 1ª paga (mar/26), 2ª em ago/26 (pendente).'},
+    {id:8,cat:'Espaço / buffet',fornecedor:'Trinken Coquetel',pix:'50.001.646/0001-61',previsto:4100,contratado:4100,pago:2378,parcelas:5,parcelasPagas:3,vparcela:574,venc:'2026-06-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'Entrada R$1.230 (mar/26) + 5x R$574. Pagas: mar,abr,mai. Abertas: jun R$574 + jul R$574.'},
+    {id:9,cat:'Espaço / buffet',fornecedor:'Romildo Bolo',pix:'94956847300',previsto:1250,contratado:1250,pago:625,parcelas:2,parcelasPagas:1,vparcela:625,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Priscila',status:'pago parcial',obs:'2x R$625: 1ª paga (mar/26), 2ª em ago/26 (pendente). Pendente resposta sobre frutas.'},
+    {id:10,cat:'Decoração',fornecedor:'Cocos',pix:'49.957.981/0001-59',previsto:654,contratado:654,pago:654,parcelas:1,parcelasPagas:1,vparcela:654,venc:'',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago total',obs:'Pago. R$654.'},
+    {id:11,cat:'Taxas extras',fornecedor:'Gerador',pix:'',previsto:2630,contratado:0,pago:0,parcelas:2,parcelasPagas:0,vparcela:0,venc:'2026-05-01',forma:'PIX',cartao:'A confirmar',resp:'Thiago',status:'previsto',obs:'R$750 em mai/26 (PENDENTE) + R$1.880 em ago/26. Pedir contrato, assinar e pagar.'},
+    {id:12,cat:'Música / banda / DJ',fornecedor:'Locomotiva Banda',pix:'803.876.163-49',previsto:11000,contratado:11000,pago:5500,parcelas:2,parcelasPagas:1,vparcela:5500,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Thiago',status:'pago parcial',obs:'2x R$5.500: mai/26 pago. ago/26 pendente. Pendente: agendar reunião, pedir contrato.'},
+    {id:13,cat:'Espaço / buffet',fornecedor:'Balcão Bar',pix:'85999737752',previsto:900,contratado:900,pago:450,parcelas:2,parcelasPagas:1,vparcela:450,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'pago parcial',obs:'2x R$450: mai/26 pago. ago/26 pendente.'},
+    {id:14,cat:'Beleza da noiva',fornecedor:'Cabelo e Maquiagem',pix:'88997873073',previsto:3000,contratado:3000,pago:900,parcelas:2,parcelasPagas:1,vparcela:0,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Priscila',status:'pago parcial',obs:'R$900 (abr/26 pago) + R$2.100 (ago/26 pendente).'},
+    {id:15,cat:'Espaço / buffet',fornecedor:'Chopp',pix:'Aguardando',previsto:1000,contratado:0,pago:0,parcelas:4,parcelasPagas:0,vparcela:233.33,venc:'2026-05-01',forma:'PIX',cartao:'A confirmar',resp:'Thiago',status:'previsto',obs:'Entrada R$300 (mai/26 PENDENTE) + 3x R$233,33 (jun,jul,ago). Aguardando orçamento Jarllan.'},
+    {id:16,cat:'Música / banda / DJ',fornecedor:'DJ',pix:'Aguardando',previsto:3000,contratado:0,pago:0,parcelas:4,parcelasPagas:0,vparcela:0,venc:'2026-05-01',forma:'PIX',cartao:'A confirmar',resp:'Thiago',status:'previsto',obs:'Entrada R$1.500 (mai/26 PENDENTE) + 3x R$500 (jun,jul,ago). Aguardando orçamento Jarllan.'},
+    {id:17,cat:'Taxas extras',fornecedor:'Seguranças',pix:'Aguardando',previsto:870,contratado:0,pago:0,parcelas:2,parcelasPagas:0,vparcela:435,venc:'2026-05-01',forma:'PIX',cartao:'A confirmar',resp:'Thiago',status:'previsto',obs:'R$435 (mai/26 PENDENTE) + R$435 (ago/26).'},
+    {id:18,cat:'Espaço / buffet',fornecedor:'Refeição Fornecedores',pix:'Aguardando',previsto:3237.50,contratado:0,pago:0,parcelas:1,parcelasPagas:0,vparcela:3237.50,venc:'2026-08-01',forma:'PIX',cartao:'A confirmar',resp:'Ambos',status:'previsto',obs:'Pagamento único em ago/26.'},
+    {id:19,cat:'Viagem casamento',fornecedor:'Latam Air (FOR↔GRU)',pix:'',previsto:1500,contratado:1500,pago:0,parcelas:0,parcelasPagas:0,vparcela:0,venc:'',forma:'Crédito',cartao:'Nubank Thiago',resp:'Ambos',status:'contratado',obs:'Voos FOR→GRU 13/set e retorno. Latam R$499,19 à vista + R$302,51 em 4x. Detalhes a confirmar.'},
   ],
   lua: [
     {id:1,cat:'Passagens',item:'Air Europa (Thiago) GRU↔VCE',fornecedor:'Air Europa',cidade:'São Paulo / Veneza',inicio:'2026-09-14',fim:'2026-09-25',previsto:5805.36,contratado:5805.36,pago:5805.36,parcelas:12,vparcela:483.78,mes1:'2025-10',cartao:'Nubank Thiago (Black)',status:'pago parcial',obs:'12x R$483,78. Parcelas 1–7 pagas. 8–12 abertas (jun–out/26).'},
@@ -876,7 +929,7 @@ function renderTab(id){
   else if(id==='casamento') renderCasamento();
   else if(id==='lua-de-mel') renderLua();
   else if(id==='cartoes') renderCartoes();
-  else if(id==='acoes') renderAcoes();
+  else if(id==='acoes') {renderAcoes();renderPendenciasPix();}
 }
 
 // ============================================================
@@ -1138,21 +1191,159 @@ function renderCasamento(){
   const cats=[...new Set(db.casamento.map(i=>i.cat))];
   const catSel=document.getElementById('cas-filter-cat');
   if(catSel&&catSel.options.length<=1) cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.text=c;catSel.appendChild(o);});
-  let items=db.casamento;
+  let items=[...db.casamento];
   if(catF) items=items.filter(i=>i.cat===catF);
   if(stF) items=items.filter(i=>i.status===stF);
-  document.getElementById('cas-body').innerHTML=items.map(i=>`<tr>
-    <td>${i.cat}</td><td><strong>${i.fornecedor}</strong></td>
-    <td>${fmt(i.previsto)}</td><td>${fmt(i.contratado)}</td><td>${fmt(i.pago)}</td>
-    <td><strong>${fmt((i.contratado||i.previsto||0)-(i.pago||0))}</strong></td>
-    <td>${i.parcelas?`${i.parcelas}x ${fmt(i.vparcela)}`:'–'}</td>
-    <td>${i.cartao||'–'}</td><td>${i.resp||'–'}</td><td>${statusBadge(i.status)}</td>
-    <td><span class="edit-icon" onclick="editCasamento(${i.id})">✏️</span></td></tr>`).join('')||`<tr><td colspan="11" class="table-empty">Nenhum item</td></tr>`;
+
+  // Sort maior→menor pelo valor contratado (ou previsto se não contratado)
+  items.sort((a,b)=>(b.contratado||b.previsto||0)-(a.contratado||a.previsto||0));
+
+  const maxVal=Math.max(...items.map(i=>i.contratado||i.previsto||0),1);
+
+  function fmtK(v){if(v===0)return '–';return v>=1000?(v/1000).toFixed(v%1000===0?0:1).replace('.',',')+'k':String(Math.round(v));}
+  function stClass(s){const m={'pago total':'st-pago-total','pago parcial':'st-pago-parcial','contratado':'st-contratado','previsto':'st-previsto','cancelado':'st-cancelado'};return m[s]||'st-previsto';}
+
+  // ── Gráfico de barras horizontais ──
+  const rows=items.map(i=>{
+    const total=i.contratado||i.previsto||0;
+    const pago=i.pago||0;
+    const pct=total>0?Math.min(Math.round(pago/total*100),100):0;
+    // barW = tamanho total da barra no eixo (proporcional ao maior valor)
+    const barW=Math.round(total/maxVal*100);
+    // pagoW = porção paga dentro da barra total
+    const pagoW=Math.round(barW*pct/100);
+    const totalParc=i.parcelas||0;
+    const pagasParc=Math.min(i.parcelasPagas||0,totalParc);
+    const isQuitado=i.status==='pago total';
+    const isPrevisto=!i.contratado||i.contratado===0;
+
+    // Camada de fundo (total contratado/previsto) + camada paga por cima
+    // Previsto: só cinza
+    // Contratado sem pagamento: só âmbar
+    // Pago parcial: âmbar (em aberto) + azul por cima (pago)
+    // Pago total: só verde
+    let bgLayer='', paidLayer='';
+    if(isPrevisto){
+      bgLayer=`<div style="position:absolute;left:0;top:0;height:100%;width:${barW}%;background:var(--slate-light);opacity:.35;border-radius:4px"></div>`;
+    } else if(isQuitado){
+      bgLayer=`<div style="position:absolute;left:0;top:0;height:100%;width:${barW}%;background:var(--green);border-radius:4px"></div>`;
+    } else {
+      // fundo âmbar (total em aberto), sobreposição azul (pago)
+      bgLayer=`<div style="position:absolute;left:0;top:0;height:100%;width:${barW}%;background:var(--amber);opacity:.55;border-radius:4px"></div>`;
+      if(pago>0) paidLayer=`<div style="position:absolute;left:0;top:0;height:100%;width:${pagoW}%;background:var(--blue);border-radius:4px;transition:width .55s ease"></div>`;
+    }
+
+    // texto dentro da barra — posicionado sobre a área colorida principal
+    const valText=`<span class="cas-bar-val">${fmtK(pago)}/${fmtK(total)}</span>`;
+    const parcText=totalParc>0?`<span class="cas-bar-parc">${pagasParc}/${totalParc} parc</span>`:'';
+    const pctText=!isPrevisto&&pct>0?`<span class="cas-bar-pct">${pct}%</span>`:'';
+
+    // pix icon
+    const hasPix=i.pix&&i.pix!=='Aguardando'&&i.pix!=='';
+    const pixTitle=hasPix?`Fazer PIX${i.vparcela>0?' de '+fmt(i.vparcela):''}→ ${i.pix}\n${i.fornecedor}`:(i.pix==='Aguardando'?'PIX: aguardando':'Sem PIX');
+    const pixBtn=hasPix
+      ?`<button class="btn-pix-icon has-pix" onclick="copiarPix('${i.pix.replace(/'/g,"\\'")}',this)" title="${pixTitle}">💸</button>`
+      :`<button class="btn-pix-icon no-pix" title="${pixTitle}" disabled>💸</button>`;
+
+    return `<div class="cas-row">
+      <div class="cas-row-label" title="${i.fornecedor}">${i.fornecedor}</div>
+      <div class="cas-bar-track">
+        ${bgLayer}${paidLayer}
+        <div class="cas-bar-inner">
+          ${valText}${parcText}${pctText}
+        </div>
+      </div>
+      <div class="cas-bar-meta">
+        ${pixBtn}
+        <button class="cas-edit-btn" onclick="editCasamento(${i.id})" title="Editar">✏️</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('cas-body').innerHTML=rows||`<div style="padding:32px;text-align:center;color:var(--slate-light)">Nenhum item</div>`;
+
+  // ── Legenda de cores ──
+  const legendItems=[
+    {bg:"var(--green)",label:"Pago total"},
+    {bg:"var(--blue)",label:"Pago (porção quitada)"},
+    {bg:"var(--amber)",label:"Em aberto"},
+    {bg:"var(--slate-light)",label:"Previsto"},
+  ];
+  document.getElementById("cas-legend").innerHTML=legendItems.map(l=>
+    `<div class="cas-legend-item"><div class="cas-legend-dot" style="background:${l.bg};${l.label==="Previsto"?"opacity:.4":""}"></div>${l.label}</div>`
+  ).join("");
+
+  // ── Gráfico de colunas por mês ──
+  // Calcula total a pagar por mês (parcelas em aberto = emAberto distribuído)
+  // Usa db.casamento: agrupa por mês de vencimento da próxima parcela
+  // Para itens com parcelas: distribui as parcelas restantes nos próximos meses
+  const today=new Date();
+  const todayYM=today.toISOString().slice(0,7);
+  // Gera 8 meses a partir do mês atual
+  const meses=Array.from({length:8},(_,k)=>{
+    const d=new Date(today.getFullYear(),today.getMonth()+k,1);
+    return d.toISOString().slice(0,7);
+  });
+  const byMes={};meses.forEach(m=>{byMes[m]=0;});
+
+  db.casamento.forEach(i=>{
+    if(!i.contratado||i.contratado===0)return; // apenas contratados
+    const emAberto=(i.contratado||0)-(i.pago||0);
+    if(emAberto<=0)return;
+    const totalParc=i.parcelas||0;
+    const pagasParc=i.parcelasPagas||0;
+    const restParc=Math.max(0,totalParc-pagasParc);
+    if(totalParc>0&&i.vparcela>0&&restParc>0){
+      // Distribui parcelas restantes mês a mês a partir do vencimento
+      let baseDate=i.venc?new Date(i.venc+'T00:00:00'):new Date(today.getFullYear(),today.getMonth(),10);
+      for(let p=0;p<restParc;p++){
+        const d=new Date(baseDate.getFullYear(),baseDate.getMonth()+p,baseDate.getDate());
+        const ym=d.toISOString().slice(0,7);
+        if(byMes[ym]!==undefined) byMes[ym]+=i.vparcela;
+      }
+    } else {
+      // Sem parcelas definidas: coloca tudo no mês do vencimento ou mês atual
+      const ym=i.venc?i.venc.slice(0,7):todayYM;
+      if(byMes[ym]!==undefined) byMes[ym]+=emAberto;
+    }
+  });
+
+  const vals=meses.map(m=>byMes[m]);
+  const maxMes=Math.max(...vals,1);
+  const MCHART_COLORS={
+    cur:'#2563eb',
+    fut:'#93c5fd',
+    big:'#dc2626',
+  };
+  const barsHtml=meses.map((m,k)=>{
+    const v=vals[k];
+    const isCur=m===todayYM;
+    const color=v>10000?MCHART_COLORS.big:isCur?MCHART_COLORS.cur:MCHART_COLORS.fut;
+    const h=v>0?Math.max(Math.round(v/maxMes*88),4):0;
+    const label=new Date(m+'-15').toLocaleDateString('pt-BR',{month:'short'}).replace('.','');
+    return `<div class="cas-mchart-col">
+      <div class="cas-mchart-val">${v>0?fmtK(v):''}</div>
+      <div class="cas-mchart-bar" style="height:${h}px;background:${h>0?color:'transparent'};border-radius:3px 3px 0 0"></div>
+      <div class="cas-mchart-label${isCur?' cur':''}">${label}</div>
+    </div>`;
+  }).join('');
+
+  const totalMes=vals.reduce((a,v)=>a+v,0);
+  document.getElementById('cas-month-chart').innerHTML=totalMes>0
+    ?`<div class="cas-mchart-title">📅 A pagar por mês (contratado em aberto)</div><div class="cas-mchart-bars">${barsHtml}</div>`
+    :'';
+
+  // ── Totais ──
   const tP=items.reduce((a,i)=>a+(i.previsto||0),0);
   const tC=items.reduce((a,i)=>a+(i.contratado||0),0);
   const tPg=items.reduce((a,i)=>a+(i.pago||0),0);
-  const tA=items.reduce((a,i)=>a+((i.contratado||i.previsto||0)-(i.pago||0)),0);
-  document.getElementById('cas-totals').innerHTML=`<td></td><td>Totais</td><td>${fmt(tP)}</td><td>${fmt(tC)}</td><td>${fmt(tPg)}</td><td>${fmt(tA)}</td><td colspan="5"></td>`;
+  const tA=tC-tPg;
+  document.getElementById('cas-totals').innerHTML=
+    `<span>Previsto: <strong>${fmt(tP)}</strong></span>`+
+    `<span>Contratado: <strong>${fmt(tC)}</strong></span>`+
+    `<span style="color:var(--green)">Pago: <strong>${fmt(tPg)}</strong></span>`+
+    `<span style="color:var(--amber)">Em aberto: <strong>${fmt(tA)}</strong></span>`;
+
   document.getElementById('cas-cards').innerHTML=[
     {label:'Previsto total',value:fmt(db.casamento.reduce((a,i)=>a+(i.previsto||0),0)),cls:'card-blue'},
     {label:'Contratado',value:fmt(db.casamento.reduce((a,i)=>a+(i.contratado||0),0)),cls:''},
@@ -1173,27 +1364,53 @@ function renderLua(){
   let items=db.lua;
   if(catF) items=items.filter(i=>i.cat===catF);
   if(stF) items=items.filter(i=>i.status===stF);
-  document.getElementById('lua-body').innerHTML=items.map(i=>`<tr>
-    <td>${i.cat}</td>
-    <td><strong>${i.item}</strong>${i.cidade?`<br><small style="color:var(--slate-light)">${i.cidade}</small>`:''}</td>
-    <td style="white-space:nowrap">${i.inicio?fmtDateShort(i.inicio):''}${i.fim?' – '+fmtDateShort(i.fim):''}</td>
-    <td>${fmt(i.previsto)}</td><td>${fmt(i.contratado)}</td><td>${fmt(i.pago)}</td>
-    <td><strong>${fmt((i.contratado||i.previsto||0)-(i.pago||0))}</strong></td>
-    <td>${i.parcelas?`${i.parcelas}x ${fmt(i.vparcela)}`:'–'}</td>
-    <td>${i.cartao||'–'}</td><td>${statusBadge(i.status)}</td>
-    <td><span class="edit-icon" onclick="editLua(${i.id})">✏️</span></td></tr>`).join('')||`<tr><td colspan="11" class="table-empty">Nenhum item</td></tr>`;
+
+  // Helper: parcelas quitadas a partir de db.parcelas vinculadas ao item
+  function parcelasQuitadas(luaItem){
+    if(!luaItem.parcelas||luaItem.parcelas<=0) return {quitadas:0,total:0};
+    // Busca parcelas pelo item name
+    const pars=db.parcelas.filter(p=>p.origem==='lua de mel'&&p.item===luaItem.item);
+    const quitadas=pars.filter(p=>p.status==='paga').length;
+    return {quitadas, total:luaItem.parcelas};
+  }
+
+  const statusOpts=['previsto','contratado','pago parcial','pago total','cancelado'];
+  const catOpts=['Passagens','Hospedagem','Carro','Seguro viagem','Alimentação','Passeios','Pedágios / combustível','Trem / transporte local','Compras','Emergência','Taxas','Outros'];
+
+  document.getElementById('lua-body').innerHTML=items.map(i=>{
+    const pq=parcelasQuitadas(i);
+    const pqText=i.parcelas>0?`${pq.quitadas}/${pq.total}`:'–';
+    const vpText=i.vparcela>0?fmt(i.vparcela):'–';
+    // Pago = soma das parcelas quitadas
+    const pagoReal=i.parcelas>0?(pq.quitadas*(i.vparcela||0)):i.pago||0;
+    return `<tr data-lua-id="${i.id}">
+    <td><span class="lua-inline-text" ondblclick="luaStartEdit(${i.id},'item',this)" title="Duplo clique para editar">${i.item}</span></td>
+    <td><span class="lua-inline-text" ondblclick="luaStartEdit(${i.id},'cat',this)" title="Duplo clique para editar">${i.cat}</span></td>
+    <td><span class="lua-inline-text" ondblclick="luaStartEdit(${i.id},'inicio',this)" title="Duplo clique para editar">${i.inicio?fmtDateShort(i.inicio):'–'}</span></td>
+    <td><span class="lua-inline-text" ondblclick="luaStartEdit(${i.id},'fim',this)" title="Duplo clique para editar">${i.fim?fmtDateShort(i.fim):'–'}</span></td>
+    <td><span class="lua-inline-text" ondblclick="luaStartEdit(${i.id},'previsto',this)" title="Duplo clique para editar">${fmt(i.previsto)}</span></td>
+    <td><span class="lua-inline-text" ondblclick="luaStartEdit(${i.id},'contratado',this)" title="Duplo clique para editar">${fmt(i.contratado)}</span></td>
+    <td style="text-align:center">${i.parcelas>0?`<span style="font-weight:600;color:${pq.quitadas===pq.total&&pq.total>0?'var(--green)':'var(--text)'}">${pqText}</span>`:'–'}</td>
+    <td style="text-align:right">${vpText}</td>
+    <td>${statusBadge(i.status)}</td>
+    <td><span class="edit-icon" onclick="editLua(${i.id})">✏️</span></td></tr>`;
+  }).join('')||`<tr><td colspan="10" class="table-empty">Nenhum item</td></tr>`;
   const tP=items.reduce((a,i)=>a+(i.previsto||0),0);
   const tC=items.reduce((a,i)=>a+(i.contratado||0),0);
-  const tPg=items.reduce((a,i)=>a+(i.pago||0),0);
-  document.getElementById('lua-totals').innerHTML=`<td></td><td>Totais</td><td></td><td>${fmt(tP)}</td><td>${fmt(tC)}</td><td>${fmt(tPg)}</td><td>${fmt(tP-tPg)}</td><td colspan="4"></td>`;
+  const tPg=items.reduce((a,i)=>{
+    const pars=db.parcelas.filter(p=>p.origem==='lua de mel'&&p.item===i.item);
+    const quitadas=pars.filter(p=>p.status==='paga').length;
+    return a+(i.parcelas>0?quitadas*(i.vparcela||0):i.pago||0);
+  },0);
+  document.getElementById('lua-totals').innerHTML=`<td>Totais</td><td></td><td></td><td></td><td>${fmt(tP)}</td><td>${fmt(tC)}</td><td></td><td></td><td colspan="2"></td>`;
   const luaOrc=32000, luaComp=db.lua.reduce((a,i)=>a+(i.contratado||0),0);
   document.getElementById('lua-comprometido').textContent=fmt(luaComp);
   document.getElementById('lua-falta').textContent=fmt(luaOrc-luaComp);
   document.getElementById('lua-cards').innerHTML=[
     {label:'Orçamento ref.',value:fmt(luaOrc),cls:'card-blue'},
     {label:'Previsto total',value:fmt(tP),cls:''},
-    {label:'Pago',value:fmt(db.lua.reduce((a,i)=>a+(i.pago||0),0)),cls:'card-green'},
-    {label:'Em aberto',value:fmt(tP-db.lua.reduce((a,i)=>a+(i.pago||0),0)),cls:'card-amber'},
+    {label:'Pago (quitado)',value:fmt(tPg),cls:'card-green'},
+    {label:'Em aberto',value:fmt(tC-tPg),cls:'card-amber'},
   ].map(c=>`<div class="card ${c.cls}"><div class="card-label">${c.label}</div><div class="card-value">${c.value}</div></div>`).join('');
 }
 
@@ -1669,7 +1886,7 @@ function loadModalData(type,id){
   } else if(type==='casamento'){
     const i=db.casamento.find(x=>x.id===id); if(!i) return;
     document.getElementById('m-cas-title').textContent='Editar — '+i.fornecedor;
-    ['cat','fornecedor','previsto','contratado','pago','parcelas','vparcela','venc','forma','cartao','resp','status','obs'].forEach(f=>{const el=document.getElementById('m-cas-'+f);if(el)el.value=i[f]||'';});
+    ['cat','fornecedor','pix','previsto','contratado','pago','parcelas','parcelasPagas','vparcela','venc','forma','cartao','resp','status','obs'].forEach(f=>{const el=document.getElementById('m-cas-'+f);if(el)el.value=i[f]||'';});
     document.getElementById('m-cas-del').style.display='inline-block';
   } else if(type==='lua'){
     const i=db.lua.find(x=>x.id===id); if(!i) return;
@@ -1711,7 +1928,7 @@ function saveFatura(){
 function deleteFatura(){if(!editingId['fatura']||!confirm('Excluir esta fatura?'))return;db.faturas=db.faturas.filter(x=>x.id!==editingId['fatura']);saveData();closeModal('fatura');renderSaldos();}
 
 function saveCasamento(){
-  const item={id:editingId['casamento']||nextId(db.casamento),cat:document.getElementById('m-cas-cat').value,fornecedor:document.getElementById('m-cas-fornecedor').value||'Sem nome',previsto:parseFloat(document.getElementById('m-cas-previsto').value)||0,contratado:parseFloat(document.getElementById('m-cas-contratado').value)||0,pago:parseFloat(document.getElementById('m-cas-pago').value)||0,parcelas:parseInt(document.getElementById('m-cas-parcelas').value)||0,vparcela:parseFloat(document.getElementById('m-cas-vparcela').value)||0,venc:document.getElementById('m-cas-venc').value,forma:document.getElementById('m-cas-forma').value,cartao:document.getElementById('m-cas-cartao').value,resp:document.getElementById('m-cas-resp').value,status:document.getElementById('m-cas-status').value,obs:document.getElementById('m-cas-obs').value};
+  const item={id:editingId['casamento']||nextId(db.casamento),cat:document.getElementById('m-cas-cat').value,fornecedor:document.getElementById('m-cas-fornecedor').value||'Sem nome',pix:document.getElementById('m-cas-pix').value||'',previsto:parseFloat(document.getElementById('m-cas-previsto').value)||0,contratado:parseFloat(document.getElementById('m-cas-contratado').value)||0,pago:parseFloat(document.getElementById('m-cas-pago').value)||0,parcelas:parseInt(document.getElementById('m-cas-parcelas').value)||0,parcelasPagas:parseInt(document.getElementById('m-cas-parcelas-pagas').value)||0,vparcela:parseFloat(document.getElementById('m-cas-vparcela').value)||0,venc:document.getElementById('m-cas-venc').value,forma:document.getElementById('m-cas-forma').value,cartao:document.getElementById('m-cas-cartao').value,resp:document.getElementById('m-cas-resp').value,status:document.getElementById('m-cas-status').value,obs:document.getElementById('m-cas-obs').value};
   if(editingId['casamento']){const idx=db.casamento.findIndex(x=>x.id===editingId['casamento']);db.casamento[idx]=item;}else db.casamento.push(item);
   saveData();closeModal('casamento');renderCasamento();
 }
@@ -1825,6 +2042,91 @@ function deleteAcao(){
   if(!editingId['acao']||!confirm('Excluir?'))return;
   db.acoes=db.acoes.filter(x=>x.id!==editingId['acao']);
   saveData();closeModal('acao');renderAcoes();
+}
+
+// ============================================================
+//  LUA — EDIÇÃO INLINE
+// ============================================================
+const LUA_CAT_OPTS=['Passagens','Hospedagem','Carro','Seguro viagem','Alimentação','Passeios','Pedágios / combustível','Trem / transporte local','Compras','Emergência','Taxas','Outros'];
+const LUA_STATUS_OPTS=['previsto','contratado','pago parcial','pago total','cancelado'];
+
+function luaStartEdit(id, field, el){
+  const item=db.lua.find(x=>x.id===id);if(!item)return;
+  const val=item[field]||'';
+  let inp;
+  if(field==='cat'){
+    inp=document.createElement('select');
+    inp.className='lua-inline-select';
+    LUA_CAT_OPTS.forEach(o=>{const opt=document.createElement('option');opt.value=o;opt.textContent=o;if(o===val)opt.selected=true;inp.appendChild(opt);});
+  } else if(field==='status'){
+    inp=document.createElement('select');
+    inp.className='lua-inline-select';
+    LUA_STATUS_OPTS.forEach(o=>{const opt=document.createElement('option');opt.value=o;opt.textContent=o;if(o===val)opt.selected=true;inp.appendChild(opt);});
+  } else if(field==='inicio'||field==='fim'){
+    inp=document.createElement('input');
+    inp.type='date';inp.className='lua-inline-input';inp.value=val;
+  } else if(field==='previsto'||field==='contratado'||field==='pago'){
+    inp=document.createElement('input');
+    inp.type='number';inp.step='0.01';inp.className='lua-inline-input';inp.value=parseFloat(val)||0;
+  } else {
+    inp=document.createElement('input');
+    inp.type='text';inp.className='lua-inline-input';inp.value=val;
+  }
+  el.replaceWith(inp);
+  inp.focus();
+  if(inp.select) inp.select();
+  const commit=()=>luaCommit(id,field,inp.value,inp);
+  inp.addEventListener('blur',commit);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){inp.removeEventListener('blur',commit);renderLua();}});
+}
+
+function luaCommit(id,field,raw,inp){
+  inp.removeEventListener('blur',()=>{});
+  const item=db.lua.find(x=>x.id===id);if(!item)return;
+  if(field==='previsto'||field==='contratado'||field==='pago') item[field]=parseFloat(raw)||0;
+  else item[field]=raw;
+  saveData();renderLua();
+}
+
+// ============================================================
+//  PIX — COPIAR
+// ============================================================
+function copiarPix(chave, btn){
+  navigator.clipboard.writeText(chave).then(()=>{
+    const orig=btn.textContent;
+    btn.textContent='✅ Copiado!';
+    btn.classList.add('copiado');
+    setTimeout(()=>{btn.textContent=orig;btn.classList.remove('copiado');},2200);
+  }).catch(()=>alert('Chave PIX: '+chave));
+}
+
+// ============================================================
+//  AÇÕES — PIX DE PAGAMENTOS PENDENTES
+// ============================================================
+function renderPendenciasPix(){
+  const el=document.getElementById('acoes-pix-pend');if(!el)return;
+  const hoje=new Date().toISOString().slice(0,7);
+  // Fornecedores com saldo em aberto e PIX
+  const pendentes=db.casamento.filter(i=>{
+    const emAberto=(i.contratado||i.previsto||0)-(i.pago||0);
+    return emAberto>0&&i.pix&&i.pix!==''&&i.pix!=='Aguardando';
+  }).sort((a,b)=>(a.venc||'9').localeCompare(b.venc||'9'));
+  if(!pendentes.length){el.innerHTML=`<p style="color:var(--slate-light);font-size:.875rem">Nenhum pagamento pendente com PIX cadastrado.</p>`;return;}
+  el.innerHTML=pendentes.map(i=>{
+    const emAberto=(i.contratado||i.previsto||0)-(i.pago||0);
+    return `<div class="pend-item">
+      <div class="pend-icon">💸</div>
+      <div class="pend-body">
+        <div class="pend-title">${i.fornecedor} <strong style="color:var(--red)">${fmt(emAberto)}</strong></div>
+        <div class="pend-meta">${i.cat}${i.venc?' · Vence '+fmtDate(i.venc):''}${i.resp?' · '+i.resp:''}</div>
+        <div class="pend-pix">
+          <span style="font-size:.72rem;color:var(--slate);font-weight:500">PIX:</span>
+          <span class="pix-key">${i.pix}</span>
+          <button class="btn-copiar-pix" onclick="copiarPix('${i.pix.replace(/'/g,"\\'")}',this)">📋 Copiar PIX</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // INIT
