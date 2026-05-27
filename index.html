@@ -367,7 +367,8 @@
       <span class="topbar-title" id="topbar-title">Dashboard</span>
     </div>
     <div class="topbar-actions">
-      <button class="btn btn-outline btn-sm" onclick="exportData()">⬇ Exportar</button>
+      <button class="btn btn-outline btn-sm" onclick="syncNow()" title="Sincronizar com Supabase agora">☁️ Sync</button>
+      <button class="btn btn-outline btn-sm" onclick="exportData()">⬇ Backup</button>
       <button class="btn btn-outline btn-sm" onclick="document.getElementById('importFile').click()">⬆ Importar</button>
       <input type="file" id="importFile" accept=".json" onchange="importData(event)">
     </div>
@@ -2291,8 +2292,13 @@ function exportData(){
   const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='financas-tp-'+new Date().toISOString().slice(0,10)+'.json';a.click();
-  // Força sync imediato no Supabase ao exportar
-  if(supabaseEnabled()){clearTimeout(_saveTimer);saveToSupabase(db);}
+}
+function syncNow(){
+  if(!supabaseEnabled()){alert('Supabase não configurado.');return;}
+  clearTimeout(_saveTimer);
+  saveToSupabase(db).then(()=>{
+    // feedback já dado pelo setSyncStatus dentro de saveToSupabase
+  });
 }
 function importData(event){
   const file=event.target.files[0];if(!file)return;
