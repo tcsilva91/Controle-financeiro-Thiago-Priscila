@@ -472,8 +472,14 @@
       <!-- Gráfico de barras por cartão -->
       <div class="table-wrap section-gap" id="cart-parcelas-chart-wrap"></div>
 
-      <!-- Faturas por mês (lançamentos) -->
-      <div id="cart-faturas-wrap"></div>
+      <!-- Faturas por mês (lançamentos) — expansível -->
+      <div id="cart-faturas-section" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px">
+          <span style="font-size:.85rem;font-weight:600;color:var(--text2)" id="cart-faturas-titulo">📋 Lançamentos detalhados</span>
+          <button class="btn btn-outline btn-sm" id="cart-faturas-toggle-btn" onclick="toggleCartFaturas()">▲ Recolher</button>
+        </div>
+        <div id="cart-faturas-wrap"></div>
+      </div>
 
       <!-- Cartões cadastrados -->
       <div class="table-wrap section-gap" style="margin-top:20px">
@@ -746,7 +752,7 @@ const defaultData = {
     {id:1,cartao:'Fatura Thiago Nu',mes:'2026-06',valor:7515.72,venc:'2026-06-10',status:'paga',obs:'Fatura jun/26. Paga em mai/26. Inclui Air Europa 2x, Rentalcars, Latam.'},
     {id:2,cartao:'Fatura Pri Itaú',mes:'2026-05',valor:12030.94,venc:'2026-05-28',status:'paga',obs:'Fatura mai/26. Paga em 28/05. Inclui Airbnbs, LATAM, GOL.'},
     {id:5,cartao:'Fatura Pri Itaú',mes:'2026-06',valor:6567.63,venc:'2026-06-28',status:'em aberto',obs:'Fatura jun/26. Vence 28/06.'},
-    {id:3,cartao:'Fatura Pri MP',mes:'2026-05',valor:1051.90,venc:'2026-05-11',status:'em aberto',obs:'Fatura mai/26. Somente compras Mercado Livre parceladas'},
+    {id:3,cartao:'Fatura Pri MP',mes:'2026-05',valor:1051.90,venc:'2026-05-11',status:'paga',obs:'Fatura mai/26. Paga.'},
     {id:4,cartao:'Fatura Thiago Itaú',mes:'2026-06',valor:0,venc:'2026-07-10',status:'paga',obs:'Jun/26: saldo credor R$436,51 (reembolso Airbnb). Zerada.'},
   ],
   casamento: [
@@ -1293,26 +1299,19 @@ function renderSaldos(){
     {id:'sec-casinha', title:'💍 Reserva Casamento',  total:totalCasinha, items:casinha,  color:'var(--amber)', renderFn: ()=>casinha.map(saldoCardHtml).join('')},
     {id:'sec-faturas', title:'🧾 Faturas',  total:totalFaturas, items:fatAbert, color:'var(--red)',   renderFn: ()=>{
       // Calcular previsão do próximo mês por cartão
-      const hoje = new Date();
-      const anoMes = (d) => d.toISOString().slice(0,7);
       const addMonth = (ym) => { const [y,m]=ym.split('-').map(Number); return m===12?`${y+1}-01`:`${y}-${String(m+1).padStart(2,'0')}`; };
-      const cartoes = [...new Set(db.faturas.map(f=>f.cartao))];
-      const prevMap = {};
-      cartoes.forEach(cart => {
-        const fat = db.faturas.filter(f=>f.cartao===cart).sort((a,b)=>b.mes.localeCompare(a.mes))[0];
-        if(!fat) return;
-        const proxMes = addMonth(fat.mes);
-        const prev = db.compras.filter(c=>c.cartao===cart&&c.comp===proxMes).reduce((a,c)=>a+c.valor,0);
-        prevMap[cart] = {proxMes, prev};
-      });
 
-      // Agrupar por cartão: última fatura + previsão
+      // Por cartão: pegar a fatura com maior mes (mais recente)
       const cartoesUniq = [...new Set(db.faturas.map(f=>f.cartao))];
       return cartoesUniq.map(cart=>{
-        const fats = db.faturas.filter(f=>f.cartao===cart).sort((a,b)=>b.mes.localeCompare(a.mes));
+        const fats = [...db.faturas.filter(f=>f.cartao===cart)].sort((a,b)=>b.mes.localeCompare(a.mes));
         const ultima = fats[0];
         if(!ultima) return '';
-        const prev = prevMap[cart];
+
+        // Previsão: lançamentos no próximo comp após a última fatura
+        const proxMes = addMonth(ultima.mes);
+        const prevVal = db.compras.filter(c=>c.cartao===cart && c.comp===proxMes).reduce((a,c)=>a+c.valor,0);
+
         const isAberta = ultima.status !== 'paga';
         const borderColor = isAberta ? 'var(--red)' : 'var(--green)';
         const valorColor  = isAberta ? 'var(--red)' : 'var(--green)';
@@ -1325,10 +1324,9 @@ function renderSaldos(){
           <div class="saldo-card-valor" style="color:${valorColor}">${fmt(ultima.valor)}</div>
           <div class="saldo-card-data">Vence ${fmtDate(ultima.venc)}</div>
           ${ultima.obs?`<div style="font-size:.72rem;color:var(--slate);margin-top:6px">${ultima.obs}</div>`:''}
-          ${prev&&prev.prev>0?`<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);font-size:.72rem;color:var(--slate)">
-            📅 Previsão <strong>${prev.proxMes}</strong>: <span style="color:var(--text2);font-weight:600">${fmt(prev.prev)}</span>
-            <span style="font-size:.65rem;color:var(--slate-light)"> (lançamentos até agora)</span>
-          </div>`:''}
+          <div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);font-size:.72rem;color:var(--slate)">
+            📅 Previsão <strong>${proxMes}</strong>: <span style="color:${prevVal>0?'var(--text2)':'var(--slate-light)'};font-weight:600">${prevVal>0?fmt(prevVal):'Sem lançamentos'}</span>
+          </div>
         </div>`;
       }).join('');
     }},
@@ -1355,6 +1353,14 @@ function renderSaldos(){
       </div>
     </div>`;
   }).join('');
+}
+
+function toggleCartFaturas(){
+  const wrap = document.getElementById('cart-faturas-wrap');
+  const btn  = document.getElementById('cart-faturas-toggle-btn');
+  const open = wrap.style.display !== 'none';
+  wrap.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? '▼ Expandir' : '▲ Recolher';
 }
 
 function toggleSaldoSec(id){
@@ -1856,6 +1862,9 @@ function renderCartoes(){
     mesesV.forEach(m=>{ cfPorMes[m]=cf.filter(c=>c.comp===m); });
   }
 
+  const fwSection=document.getElementById('cart-faturas-section');
+  const fwTitulo=document.getElementById('cart-faturas-titulo');
+  if(fwSection) fwSection.style.display='block';
   const fw=document.getElementById('cart-faturas-wrap');
 
   if(!mesesV.length){
