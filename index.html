@@ -1291,17 +1291,47 @@ function renderSaldos(){
     {id:'sec-contas',  title:'💰 Contas Correntes',  total:totalContas,  items:contas,   color:'var(--blue)',  renderFn: ()=>contas.map(saldoCardHtml).join('')},
     {id:'sec-invest',  title:'📈 Investimentos',      total:totalInvest,  items:invest,   color:'var(--green)', renderFn: ()=>invest.map(saldoCardHtml).join('')},
     {id:'sec-casinha', title:'💍 Reserva Casamento',  total:totalCasinha, items:casinha,  color:'var(--amber)', renderFn: ()=>casinha.map(saldoCardHtml).join('')},
-    {id:'sec-faturas', title:'🧾 Faturas em Aberto',  total:totalFaturas, items:fatAbert, color:'var(--red)',   renderFn: ()=>db.faturas.map(f=>`
-      <div class="saldo-card" style="border-left:3px solid var(--red)">
-        <button class="saldo-card-edit btn btn-outline btn-sm" onclick="editFatura(${f.id})">✏️</button>
-        <div class="saldo-card-header">
-          <div><div class="saldo-card-nome">${f.cartao}</div><div style="font-size:.72rem;color:var(--slate)">Ref: ${f.mes}</div></div>
-          ${statusBadge(f.status)}
-        </div>
-        <div class="saldo-card-valor" style="color:${f.status==='paga'?'var(--green)':'var(--red)'}">${fmt(f.valor)}</div>
-        <div class="saldo-card-data">Vence ${fmtDate(f.venc)}</div>
-        ${f.obs?`<div style="font-size:.72rem;color:var(--slate);margin-top:8px">${f.obs}</div>`:''}
-      </div>`).join('')},
+    {id:'sec-faturas', title:'🧾 Faturas',  total:totalFaturas, items:fatAbert, color:'var(--red)',   renderFn: ()=>{
+      // Calcular previsão do próximo mês por cartão
+      const hoje = new Date();
+      const anoMes = (d) => d.toISOString().slice(0,7);
+      const addMonth = (ym) => { const [y,m]=ym.split('-').map(Number); return m===12?`${y+1}-01`:`${y}-${String(m+1).padStart(2,'0')}`; };
+      const cartoes = [...new Set(db.faturas.map(f=>f.cartao))];
+      const prevMap = {};
+      cartoes.forEach(cart => {
+        const fat = db.faturas.filter(f=>f.cartao===cart).sort((a,b)=>b.mes.localeCompare(a.mes))[0];
+        if(!fat) return;
+        const proxMes = addMonth(fat.mes);
+        const prev = db.compras.filter(c=>c.cartao===cart&&c.comp===proxMes).reduce((a,c)=>a+c.valor,0);
+        prevMap[cart] = {proxMes, prev};
+      });
+
+      // Agrupar por cartão: última fatura + previsão
+      const cartoesUniq = [...new Set(db.faturas.map(f=>f.cartao))];
+      return cartoesUniq.map(cart=>{
+        const fats = db.faturas.filter(f=>f.cartao===cart).sort((a,b)=>b.mes.localeCompare(a.mes));
+        const ultima = fats[0];
+        if(!ultima) return '';
+        const prev = prevMap[cart];
+        const isAberta = ultima.status !== 'paga';
+        const borderColor = isAberta ? 'var(--red)' : 'var(--green)';
+        const valorColor  = isAberta ? 'var(--red)' : 'var(--green)';
+        return `<div class="saldo-card" style="border-left:3px solid ${borderColor}">
+          <button class="saldo-card-edit btn btn-outline btn-sm" onclick="editFatura(${ultima.id})">✏️</button>
+          <div class="saldo-card-header">
+            <div><div class="saldo-card-nome">${ultima.cartao}</div><div style="font-size:.72rem;color:var(--slate)">Ref: ${ultima.mes}</div></div>
+            ${statusBadge(ultima.status)}
+          </div>
+          <div class="saldo-card-valor" style="color:${valorColor}">${fmt(ultima.valor)}</div>
+          <div class="saldo-card-data">Vence ${fmtDate(ultima.venc)}</div>
+          ${ultima.obs?`<div style="font-size:.72rem;color:var(--slate);margin-top:6px">${ultima.obs}</div>`:''}
+          ${prev&&prev.prev>0?`<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);font-size:.72rem;color:var(--slate)">
+            📅 Previsão <strong>${prev.proxMes}</strong>: <span style="color:var(--text2);font-weight:600">${fmt(prev.prev)}</span>
+            <span style="font-size:.65rem;color:var(--slate-light)"> (lançamentos até agora)</span>
+          </div>`:''}
+        </div>`;
+      }).join('');
+    }},
   ];
 
   // Manter estado aberto/fechado
