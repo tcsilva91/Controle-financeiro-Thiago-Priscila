@@ -1299,19 +1299,19 @@ function renderSaldos(){
     {id:'sec-invest',  title:'📈 Investimentos',      total:totalInvest,  items:invest,   color:'var(--green)', renderFn: ()=>invest.map(saldoCardHtml).join('')},
     {id:'sec-casinha', title:'💍 Reserva Casamento',  total:totalCasinha, items:casinha,  color:'var(--amber)', renderFn: ()=>casinha.map(saldoCardHtml).join('')},
     {id:'sec-faturas', title:'🧾 Faturas',  total:totalFaturas, items:fatAbert, color:'var(--red)',   renderFn: ()=>{
-      // Calcular previsão do próximo mês por cartão
-      const addMonth = (ym) => { const [y,m]=ym.split('-').map(Number); return m===12?`${y+1}-01`:`${y}-${String(m+1).padStart(2,'0')}`; };
-
-      // Por cartão: pegar a fatura com maior mes (mais recente)
+      // Por cartão: mostrar fatura atual + próxima fatura já registrada
       const cartoesUniq = [...new Set(db.faturas.map(f=>f.cartao))];
       return cartoesUniq.map(cart=>{
         const fats = [...db.faturas.filter(f=>f.cartao===cart)].sort((a,b)=>b.mes.localeCompare(a.mes));
         const ultima = fats[0];
         if(!ultima) return '';
 
-        // Previsão: lançamentos no próximo comp após a última fatura
-        const proxMes = addMonth(ultima.mes);
-        const prevVal = db.compras.filter(c=>c.cartao===cart && c.comp===proxMes).reduce((a,c)=>a+c.valor,0);
+        // Próxima fatura: segunda mais recente se a última estiver paga, 
+        // ou buscar uma fatura futura já registrada
+        const proxFatura = fats.length > 1 && fats[1].status !== 'paga' ? fats[1] : null;
+        // Se última está em aberto, próxima é a que vem depois dela
+        const faturaAberta = fats.find(f => f.status !== 'paga');
+        const faturaProx   = fats.find(f => f.status !== 'paga' && f.mes > (faturaAberta?.mes||''));
 
         const isAberta = ultima.status !== 'paga';
         const borderColor = isAberta ? 'var(--red)' : 'var(--green)';
@@ -1325,9 +1325,10 @@ function renderSaldos(){
           <div class="saldo-card-valor" style="color:${valorColor}">${fmt(ultima.valor)}</div>
           <div class="saldo-card-data">Vence ${fmtDate(ultima.venc)}</div>
           ${ultima.obs?`<div style="font-size:.72rem;color:var(--slate);margin-top:6px">${ultima.obs}</div>`:''}
-          <div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);font-size:.72rem;color:var(--slate)">
-            📅 Previsão <strong>${proxMes}</strong>: <span style="color:${prevVal>0?'var(--text2)':'var(--slate-light)'};font-weight:600">${prevVal>0?fmt(prevVal):'Sem lançamentos'}</span>
-          </div>
+          ${faturaProx?`<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);font-size:.72rem;color:var(--slate)">
+            📅 Próxima <strong>${faturaProx.mes}</strong>: <span style="color:var(--text2);font-weight:600">${fmt(faturaProx.valor)}</span>
+            <span style="margin-left:4px">${statusBadge(faturaProx.status)}</span>
+          </div>`:''}
         </div>`;
       }).join('');
     }},
