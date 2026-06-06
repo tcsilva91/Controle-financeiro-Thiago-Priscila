@@ -387,6 +387,7 @@
       <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
         <h2 class="section-title">🏦 Saldos das Contas</h2>
         <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" id="saldo-toggle-all-btn" onclick="toggleAllSaldoSecs()" title="Recolher/expandir tudo">▲ Recolher tudo</button>
           <button class="btn btn-outline btn-sm" onclick="openModal('saldo')">+ Conta</button>
           <button class="btn btn-outline btn-sm" onclick="openModal('fatura')">+ Fatura</button>
         </div>
@@ -1361,6 +1362,25 @@ function toggleCartFaturas(){
   const open = wrap.style.display !== 'none';
   wrap.style.display = open ? 'none' : 'block';
   btn.textContent = open ? '▼ Expandir' : '▲ Recolher';
+}
+
+function toggleAllSaldoSecs(){
+  const ids = ['sec-contas','sec-invest','sec-casinha','sec-faturas'];
+  const btn = document.getElementById('saldo-toggle-all-btn');
+  // Verificar se alguma está aberta
+  const anyOpen = ids.some(id => {
+    const b = document.getElementById('body-'+id);
+    return b && b.style.display !== 'none';
+  });
+  ids.forEach(id => {
+    const body = document.getElementById('body-'+id);
+    const arr  = document.getElementById('arr-'+id);
+    if(!body) return;
+    body.style.display = anyOpen ? 'none' : 'block';
+    if(arr) arr.style.transform = anyOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+    if(window._saldoOpen) window._saldoOpen[id] = !anyOpen;
+  });
+  btn.textContent = anyOpen ? '▼ Expandir tudo' : '▲ Recolher tudo';
 }
 
 function toggleSaldoSec(id){
