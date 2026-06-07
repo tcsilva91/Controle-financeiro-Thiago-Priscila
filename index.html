@@ -417,8 +417,6 @@
           <button class="btn btn-outline btn-sm" onclick="openModal('fatura')">+ Fatura</button>
         </div>
       </div>
-      <!-- Cards resumo executivo -->
-      <div id="saldo-exec-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px"></div>
       <!-- Seções expansíveis -->
       <div id="saldo-sections"></div>
     </div>
@@ -1223,6 +1221,7 @@ function loadData() {
       const d = JSON.parse(r);
       if (!d.compras) d.compras = [];
       if (!d.acoes) d.acoes = JSON.parse(JSON.stringify(defaultData.acoes));
+      if (!d.fluxo) d.fluxo = JSON.parse(JSON.stringify(defaultData.fluxo));
       return d;
     }
   } catch(e) {}
@@ -1509,31 +1508,6 @@ function renderSaldos(){
   const totalCasinha = casinha.reduce((a,s)=>a+s.valor,0);
   const totalFaturas = fatAbert.reduce((a,f)=>a+f.valor,0);
   const saldoLiq     = totalContas + totalInvest + totalCasinha - totalFaturas;
-
-  // ── Cards executivos ──
-  const cards = [
-    {label:'Contas Correntes', value:fmt(totalContas), icon:'💰', color:'card-blue',
-     sub:`${contas.length} conta${contas.length!==1?'s':''}`},
-    {label:'Investimentos', value:fmt(totalInvest), icon:'📈', color:'card-green',
-     sub:`${invest.length} aplicaç${invest.length!==1?'ões':'ão'}`},
-    {label:'Reserva Casamento', value:fmt(totalCasinha), icon:'💍', color:'card-amber',
-     sub:'Caixinha dedicada'},
-    {label:'Faturas em Aberto', value:fatAbert.length?`− ${fmt(totalFaturas)}`:'R$ 0,00', icon:'🧾',
-     color:fatAbert.length?'card-red':'card-green',
-     sub:`${fatAbert.length} fatura${fatAbert.length!==1?'s':''} pendente${fatAbert.length!==1?'s':''}`},
-    {label:'Saldo Líquido', value:fmt(saldoLiq), icon:'⚖️',
-     color:saldoLiq>=0?'card-green':'card-red',
-     sub:'Correntes + Invest. + Casamento − Faturas'},
-  ];
-  document.getElementById('saldo-exec-cards').innerHTML = cards.map(c=>`
-    <div class="card ${c.color}" style="position:relative">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-        <div class="card-label">${c.label}</div>
-        <span style="font-size:1.2rem">${c.icon}</span>
-      </div>
-      <div class="card-value" style="font-size:1.35rem">${c.value}</div>
-      <div class="card-sub">${c.sub}</div>
-    </div>`).join('');
 
   // ── Seções expansíveis ──
   const saldoCardHtml = (s) => {
