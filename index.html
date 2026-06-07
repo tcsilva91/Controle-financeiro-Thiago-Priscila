@@ -2901,7 +2901,7 @@ function renderFluxo(){
   // Gráfico de linha — saldo final por mês
   const saldoMes = {};
   meses.forEach(m=>{
-    const itens = db.fluxo.filter(f=>f.mes===m&&f.saldo>0);
+    const itens = db.fluxo.filter(f=>f.mes===m&&f.saldo!==0);
     if(itens.length) saldoMes[m] = itens[itens.length-1].saldo;
   });
   const chartWrap = document.getElementById('fluxo-chart-wrap');
