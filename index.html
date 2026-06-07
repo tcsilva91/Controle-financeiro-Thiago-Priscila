@@ -2898,34 +2898,49 @@ function renderFluxo(){
 
   let dados = db.fluxo.filter(f => (!filtroGrupo || f.grupo===filtroGrupo) && (!filtroMes || f.mes===filtroMes));
 
-  // Gráfico de linha — saldo final por mês
-  const saldoMes = {};
+  // Graficos de linha e colunas
+  const saldoFimMes = {}, saldoMinMes = {};
   meses.forEach(m=>{
     const itens = db.fluxo.filter(f=>f.mes===m&&f.saldo!==0);
-    if(itens.length) saldoMes[m] = itens[itens.length-1].saldo;
+    if(!itens.length) return;
+    saldoFimMes[m] = itens[itens.length-1].saldo;
+    saldoMinMes[m] = Math.min(...itens.map(f=>f.saldo));
   });
+  const hoje2 = new Date(); const mesAtualStr = hoje2.toISOString().slice(0,7);
+  if(!window._fluxoMesSel) window._fluxoMesSel = meses.includes(mesAtualStr) ? mesAtualStr : (meses[0]||'');
+  window._saldoFimMes = saldoFimMes; window._saldoMinMes = saldoMinMes; window._fluxoMeses = meses;
+
   const chartWrap = document.getElementById('fluxo-chart-wrap');
   if(chartWrap){
-    const mesesChart = Object.keys(saldoMes);
-    const maxSaldo = Math.max(...Object.values(saldoMes));
-    const minSaldo = Math.min(...Object.values(saldoMes));
-    const W=800, H=140, PAD=50, BAR_W=Math.max(20,(W-PAD*2)/mesesChart.length-8);
-    const escY = v => PAD + (H-PAD*2) * (1 - (v - minSaldo*0.95) / (maxSaldo*1.05 - minSaldo*0.95));
-    const escX = i => PAD + (i+0.5) * (W-PAD*2)/mesesChart.length;
-    const pts = mesesChart.map((m,i)=>`${escX(i)},${escY(saldoMes[m])}`).join(' ');
-    chartWrap.innerHTML = `<div class="fluxo-chart-container">
-      <div style="font-size:.8rem;font-weight:600;color:var(--slate);margin-bottom:12px">📈 Saldo projetado por mês</div>
-      <svg viewBox="0 0 ${W} ${H+30}" style="width:100%;max-height:180px;overflow:visible">
-        <polyline points="${pts}" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linejoin="round"/>
-        ${mesesChart.map((m,i)=>`
-          <circle cx="${escX(i)}" cy="${escY(saldoMes[m])}" r="4" fill="var(--blue)"/>
-          <text x="${escX(i)}" y="${H+16}" text-anchor="middle" font-size="10" fill="var(--slate)">${fmtMes(m)}</text>
-          <text x="${escX(i)}" y="${escY(saldoMes[m])-8}" text-anchor="middle" font-size="9" fill="var(--slate)">${fmtK(saldoMes[m])}</text>
-        `).join('')}
-        <line x1="${PAD}" y1="${PAD}" x2="${PAD}" y2="${H-PAD}" stroke="var(--border)" stroke-width="1"/>
-      </svg>
-    </div>`;
+    const mesesChart = Object.keys(saldoFimMes);
+    chartWrap.innerHTML = `
+      <div class="fluxo-chart-container" style="margin-bottom:12px">
+        <div style="font-size:.8rem;font-weight:600;color:var(--slate);margin-bottom:6px">Saldo projetado por mes</div>
+        <div style="display:flex;gap:16px;font-size:.72rem;color:var(--slate);margin-bottom:8px">
+          <span><span style="display:inline-block;width:20px;height:2px;background:#4a6fa5;vertical-align:middle;margin-right:4px"></span>Saldo fim</span>
+          <span><span style="display:inline-block;width:20px;height:0;border-top:2px dashed #dc6700;vertical-align:middle;margin-right:4px"></span>Saldo minimo</span>
+        </div>
+        <div style="position:relative;width:100%;height:200px"><canvas id="fluxo-linha-chart" role="img" aria-label="Saldo projetado por mes"></canvas></div>
+      </div>
+      <div class="fluxo-chart-container">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:.8rem;font-weight:600;color:var(--slate)">Entradas e saidas do mes</div>
+            <button class="btn btn-outline btn-sm" id="fluxo-col-toggle" onclick="toggleFluxoCol()" style="font-size:.7rem;padding:2px 8px">▼ Ocultar</button>
+          </div>
+          <select id="fluxo-mes-sel" class="btn btn-outline btn-sm" style="cursor:pointer;font-size:.75rem" onchange="window._fluxoMesSel=this.value;renderFluxoColChart()">
+            ${meses.map(m=>'<option value="'+m+'"'+(m===window._fluxoMesSel?' selected':'')+'>'+fmtMes(m)+'</option>').join('')}
+          </select>
+        </div>
+        <div id="fluxo-col-body"><div style="position:relative;width:100%;height:200px" id="fluxo-col-wrap"><canvas id="fluxo-col-chart" role="img" aria-label="Entradas e saidas do mes"></canvas></div></div>
+      </div>`;
+
+    const doCharts = () => { renderFluxoLinhaChart(mesesChart); renderFluxoColChart(); };
+    if(!window.Chart){
+      const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js'; s.onload=doCharts; document.head.appendChild(s);
+    } else { doCharts(); }
   }
+
 
   // Meses expansíveis
   const container = document.getElementById('fluxo-meses');
@@ -3108,6 +3123,131 @@ function editarLimites(){
   item.limite = parseFloat(novo.replace(',','.').replace(/[^0-9.]/g,''))||0;
   saveData();
   renderLimitesMensais();
+}
+
+
+function renderFluxoLinhaChart(mesesChart){
+  const cv = document.getElementById('fluxo-linha-chart');
+  if(!cv||!window.Chart) return;
+  if(cv._chartInst) cv._chartInst.destroy();
+  const fim = mesesChart.map(m=>Math.round(window._saldoFimMes[m]));
+  const min = mesesChart.map(m=>Math.round(window._saldoMinMes[m]));
+  const fmtBRL = v => 'R$ '+(v<0?'-':'')+Math.abs(v).toLocaleString('pt-BR');
+  cv._chartInst = new Chart(cv, {
+    type: 'line',
+    data: {
+      labels: mesesChart.map(m=>window.fmtMes?fmtMes(m):m),
+      datasets: [
+        {label:'Saldo fim', data: fim, borderColor:'#4a6fa5', backgroundColor:'rgba(74,111,165,.08)', pointBackgroundColor:'#4a6fa5', tension:.3, fill:true},
+        {label:'Saldo minimo', data: min, borderColor:'#dc6700', borderDash:[6,3], pointBackgroundColor:'#dc6700', tension:.3, fill:false},
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtBRL(ctx.raw)}}},
+      scales:{
+        x:{ticks:{font:{size:10}}, grid:{display:false}},
+        y:{ticks:{callback:v=>v>=1000?'R$'+(v/1000).toFixed(0)+'k':v<=-1000?'-R$'+(Math.abs(v)/1000).toFixed(0)+'k':'R$'+v, font:{size:10}}, grid:{color:'rgba(0,0,0,.06)'}}
+      }
+    }
+  });
+}
+
+function toggleFluxoCol(){
+  const body = document.getElementById('fluxo-col-body');
+  const btn  = document.getElementById('fluxo-col-toggle');
+  if(!body||!btn) return;
+  const vis = body.style.display !== 'none';
+  body.style.display = vis ? 'none' : 'block';
+  btn.textContent = vis ? '▶ Mostrar' : '▼ Ocultar';
+}
+
+function renderFluxoColChart(){
+  const body = document.getElementById('fluxo-col-body');
+  if(body && body.style.display==='none') return;
+  const cv = document.getElementById('fluxo-col-chart');
+  if(!cv||!window.Chart||!db.fluxo) return;
+  if(cv._chartInst) cv._chartInst.destroy();
+  const mes = window._fluxoMesSel;
+  const itens = db.fluxo.filter(f=>f.mes===mes&&f.valor!==0&&f.data).sort((a,b)=>a.data.localeCompare(b.data)||a.id-b.id);
+  const fmtBRL = v => 'R$ '+(v<0?'-':'')+Math.abs(Math.round(v)).toLocaleString('pt-BR');
+  const shortDesc = s => s.length>14 ? s.slice(0,12)+'…' : s;
+
+  // Escala adaptativa: percentil 85 dos valores absolutos
+  const absVals = itens.map(f=>Math.abs(f.valor)).sort((a,b)=>a-b);
+  const p85idx  = Math.floor(absVals.length * 0.85);
+  const p85     = absVals[p85idx] || 1000;
+  const yMax    = Math.ceil(p85 * 1.3 / 1000) * 1000;
+  const yMin    = -yMax;
+
+  // Identificar outliers (acima do p85)
+  const isOutlier = f => Math.abs(f.valor) > p85;
+  const colors = itens.map(f=> isOutlier(f)
+    ? (f.valor>0 ? 'rgba(39,103,73,.4)' : 'rgba(220,103,0,.4)')
+    : (f.valor>0 ? 'rgba(39,103,73,.8)' : 'rgba(220,103,0,.8)')
+  );
+  const borders = itens.map(f=> isOutlier(f)
+    ? (f.valor>0 ? 'rgba(39,103,73,1)' : 'rgba(220,103,0,1)')
+    : 'transparent'
+  );
+
+  cv._chartInst = new Chart(cv, {
+    type:'bar',
+    data:{
+      labels: itens.map((f,i)=>i),
+      datasets:[{
+        label:'Valor',
+        data: itens.map(f=>{
+          const v = Math.round(f.valor);
+          if(v > yMax) return yMax;
+          if(v < yMin) return yMin;
+          return v;
+        }),
+        backgroundColor: colors,
+        borderColor: borders,
+        borderWidth: 2,
+        borderRadius: 3,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{
+          title: ctx => { const f=itens[ctx[0].dataIndex]; return f.data.split('-').reverse().join('/')+' — '+f.desc; },
+          label: ctx => {
+            const f = itens[ctx.dataIndex];
+            const oot = isOutlier(f) ? ' ⚠ valor alto' : '';
+            return [fmtBRL(f.valor)+oot, f.grupo||''];
+          }
+        }},
+        afterDraw: chart => {
+          const {ctx: c, scales:{x,y}} = chart;
+          itens.forEach((f,i)=>{
+            if(!isOutlier(f)) return;
+            const xPos = x.getPixelForValue(i);
+            const yPos = f.valor>0 ? y.getPixelForValue(yMax)-14 : y.getPixelForValue(yMin)+6;
+            c.save();
+            c.font = 'bold 8px sans-serif';
+            c.fillStyle = f.valor>0 ? '#276749' : '#a53a00';
+            c.textAlign = 'center';
+            c.fillText(fmtBRL(f.valor).replace('R$ ',''), xPos, yPos);
+            c.restore();
+          });
+        }
+      },
+      scales:{
+        x:{ticks:{font:{size:9}, autoSkip:false, maxRotation:70, callback:(v,i)=>shortDesc(itens[i]?.desc||'')}, grid:{display:false}},
+        y:{
+          min: yMin, max: yMax,
+          ticks:{callback:v=>v>=1000?'R$'+(v/1000).toFixed(0)+'k':v<=-1000?'-R$'+(Math.abs(v)/1000).toFixed(0)+'k':'R$'+v, font:{size:10}},
+          grid:{color:'rgba(0,0,0,.06)'}
+        }
+      }
+    }
+  });
+  const wrap = document.getElementById('fluxo-col-wrap');
+  if(wrap) wrap.style.height = Math.max(220, itens.length*16+80)+'px';
 }
 
 </script>
