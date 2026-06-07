@@ -2926,13 +2926,13 @@ function renderFluxo(){
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div style="display:flex;align-items:center;gap:8px">
             <div style="font-size:.8rem;font-weight:600;color:var(--slate)">Entradas e saidas do mes</div>
-            <button class="btn btn-outline btn-sm" id="fluxo-col-toggle" onclick="toggleFluxoCol()" style="font-size:.7rem;padding:2px 8px">▼ Ocultar</button>
+            <button class="btn btn-outline btn-sm" id="fluxo-col-toggle" onclick="toggleFluxoCol()" style="font-size:.7rem;padding:2px 8px">▶ Mostrar</button>
           </div>
           <select id="fluxo-mes-sel" class="btn btn-outline btn-sm" style="cursor:pointer;font-size:.75rem" onchange="window._fluxoMesSel=this.value;renderFluxoColChart()">
             ${meses.map(m=>'<option value="'+m+'"'+(m===window._fluxoMesSel?' selected':'')+'>'+fmtMes(m)+'</option>').join('')}
           </select>
         </div>
-        <div id="fluxo-col-body"><div style="position:relative;width:100%;height:200px" id="fluxo-col-wrap"><canvas id="fluxo-col-chart" role="img" aria-label="Entradas e saidas do mes"></canvas></div></div>
+        <div id="fluxo-col-body" style="display:none"><div style="position:relative;width:100%;height:200px" id="fluxo-col-wrap"><canvas id="fluxo-col-chart" role="img" aria-label="Entradas e saidas do mes"></canvas></div></div>
       </div>`;
 
     const doCharts = () => { renderFluxoLinhaChart(mesesChart); renderFluxoColChart(); };
@@ -2965,6 +2965,7 @@ function renderFluxo(){
           <span id="fluxo-arr-${mes}" style="transition:transform .2s;display:inline-block;transform:rotate(${isOpen?90:0}deg);font-size:.75rem">▶</span>
           <span style="font-weight:600">${fmtMes(mes)}</span>
           <span style="font-size:.75rem;color:var(--slate-light)">${itens.length} lançamentos</span>
+          <button onclick="event.stopPropagation();novoFluxo('${mes}')" class="btn btn-outline btn-sm" style="font-size:.7rem;padding:2px 8px">+ Novo</button>
         </div>
         <div style="display:flex;gap:16px;align-items:center;font-size:.78rem">
           <span style="color:var(--slate)" title="Saldo início do mês">${fmt(saldoInicio)}</span>
@@ -2989,6 +2990,7 @@ function renderFluxo(){
             <span style="display:flex;align-items:center;gap:4px">
               <span class="fluxo-status-badge fluxo-status-${f.status}">${f.status}</span>
               <button class="fluxo-edit-btn" onclick="editFluxo(${f.id})" title="Editar">✏️</button>
+              <button class="fluxo-edit-btn" onclick="excluirFluxo(${f.id})" title="Excluir" style="color:var(--red)">🗑</button>
             </span>
           </div>`).join('')}
       </div>
@@ -3015,14 +3017,101 @@ function toggleAllFluxoMeses(){
 function editFluxo(id){
   const f = db.fluxo.find(x=>x.id===id);
   if(!f) return;
-  const novoValor = prompt(`Valor (${f.desc}):`, f.valor);
-  if(novoValor === null) return;
-  const novoStatus = prompt('Status (realizado/previsto/pendente):', f.status);
-  if(novoStatus === null) return;
-  f.valor = parseFloat(novoValor.replace(',','.').replace(/[^0-9.-]/g,'')) || 0;
-  f.status = ['realizado','previsto','pendente'].includes(novoStatus) ? novoStatus : f.status;
+  openFluxoModal(f);
+}
+
+function novoFluxo(mes){
+  const hoje = new Date().toISOString().slice(0,10);
+  openFluxoModal({id:null, desc:'', grupo:'', data:hoje, mes:mes||window._fluxoMesSel||'', valor:0, saldo:0, status:'previsto', obs:''});
+}
+
+function excluirFluxo(id){
+  if(!confirm('Excluir este lançamento?')) return;
+  db.fluxo = db.fluxo.filter(f=>f.id!==id);
+  recalcularSaldosFluxo();
   saveData();
   renderFluxo();
+}
+
+function openFluxoModal(f){
+  const isNew = !f.id;
+  let m = document.getElementById('fluxo-modal');
+  if(!m){ m=document.createElement('div'); m.id='fluxo-modal'; document.body.appendChild(m); }
+  m.innerHTML = `
+    <div onclick="closeFluxoModal()" style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center">
+      <div onclick="event.stopPropagation()" style="background:var(--surface);border-radius:var(--radius);padding:24px;width:380px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,.18)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="margin:0;font-size:1rem;font-weight:600">${isNew?'Novo lançamento':'Editar lançamento'}</h3>
+          <button onclick="closeFluxoModal()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--slate)">✕</button>
+        </div>
+        <div class="field"><label>Descrição</label><input id="fm-desc" value="${f.desc}" style="width:100%"></div>
+        <div class="field"><label>Grupo</label>
+          <select id="fm-grupo" style="width:100%">
+            ${(window.CATEGORIAS||['Casamento','Lua de Mel','Casa','Família','Saúde','Transporte','Mercado','Investimento','Salário Thi','Salário Pri','Cartão crédito','Viagem Trabalho','A definir']).map(g=>`<option${g===f.grupo?' selected':''}>${g}</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Data</label><input id="fm-data" type="date" value="${f.data}" style="width:100%"></div>
+          <div class="field"><label>Mês ref.</label><input id="fm-mes" value="${f.mes}" placeholder="2026-07" style="width:100%"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Valor (R$)</label><input id="fm-valor" type="number" step="0.01" value="${f.valor}" style="width:100%"></div>
+          <div class="field"><label>Status</label>
+            <select id="fm-status" style="width:100%">
+              ${['realizado','previsto','pendente'].map(s=>`<option${s===f.status?' selected':''}>${s}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Obs</label><input id="fm-obs" value="${f.obs||''}" style="width:100%"></div>
+        <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+          ${!isNew?`<button class="btn btn-outline btn-sm" onclick="excluirFluxo(${f.id});closeFluxoModal()" style="color:var(--red);border-color:var(--red)">🗑 Excluir</button>`:''}
+          <button class="btn btn-outline btn-sm" onclick="closeFluxoModal()">Cancelar</button>
+          <button class="btn btn-primary btn-sm" onclick="salvarFluxo(${f.id||'null'})">Salvar</button>
+        </div>
+      </div>
+    </div>`;
+  m.style.display='block';
+  document.getElementById('fm-desc').focus();
+}
+
+function closeFluxoModal(){
+  const m=document.getElementById('fluxo-modal');
+  if(m) m.style.display='none';
+}
+
+function salvarFluxo(id){
+  const desc   = document.getElementById('fm-desc').value.trim();
+  const grupo  = document.getElementById('fm-grupo').value;
+  const data   = document.getElementById('fm-data').value;
+  const mes    = document.getElementById('fm-mes').value.trim();
+  const valor  = parseFloat(document.getElementById('fm-valor').value)||0;
+  const status = document.getElementById('fm-status').value;
+  const obs    = document.getElementById('fm-obs').value.trim();
+  if(!desc){ alert('Descrição obrigatória'); return; }
+
+  if(id){
+    const f = db.fluxo.find(x=>x.id===id);
+    if(f){ f.desc=desc; f.grupo=grupo; f.data=data; f.mes=mes; f.valor=valor; f.status=status; f.obs=obs; }
+  } else {
+    const newId = Math.max(0,...db.fluxo.map(f=>f.id))+1;
+    db.fluxo.push({id:newId, desc, grupo, data, mes, valor, saldo:0, status, obs});
+  }
+  recalcularSaldosFluxo();
+  saveData();
+  closeFluxoModal();
+  renderFluxo();
+}
+
+function recalcularSaldosFluxo(){
+  // Reordenar por mes+data+id
+  db.fluxo.sort((a,b)=>(a.mes||'9999').localeCompare(b.mes||'9999')||(a.data||'9999').localeCompare(b.data||'9999')||a.id-b.id);
+  // Recalcular saldo em cascata a partir do primeiro realizado com saldo
+  let ultimo = null;
+  let recalc = false;
+  for(const f of db.fluxo){
+    if(f.status==='realizado'&&f.saldo>0&&!recalc){ ultimo=f.saldo; continue; }
+    if(ultimo!==null){ recalc=true; f.saldo=Math.round((ultimo+f.valor)*100)/100; ultimo=f.saldo; }
+  }
 }
 
 
