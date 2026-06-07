@@ -1261,6 +1261,14 @@ function loadData() {
       if (!d.compras) d.compras = [];
       if (!d.acoes) d.acoes = JSON.parse(JSON.stringify(defaultData.acoes));
       if (!d.fluxo) d.fluxo = JSON.parse(JSON.stringify(defaultData.fluxo));
+      // Garantir que novos itens do defaultData sejam incluídos se não existirem
+      else {
+        const idsExist = new Set(d.fluxo.map(f=>f.id));
+        defaultData.fluxo.forEach(f=>{ if(!idsExist.has(f.id)) d.fluxo.push(f); });
+        const idsLim = new Set((d.limitesMensais||[]).map(l=>l.cat));
+        if(!d.limitesMensais) d.limitesMensais = JSON.parse(JSON.stringify(defaultData.limitesMensais));
+        else defaultData.limitesMensais.forEach(l=>{ if(!idsLim.has(l.cat)) d.limitesMensais.push(l); });
+      }
       if (!d.limitesMensais) d.limitesMensais = JSON.parse(JSON.stringify(defaultData.limitesMensais));
       return d;
     }
@@ -1610,7 +1618,7 @@ function renderSaldos(){
   if(!window._saldoOpen) window._saldoOpen={};
 
   document.getElementById('saldo-sections').innerHTML = sections.map(sec=>{
-    const isOpen = window._saldoOpen[sec.id] !== false; // aberto por padrão
+    const isOpen = window._saldoOpen[sec.id] === true; // fechado por padrão
     return `<div class="saldo-section" id="${sec.id}">
       <div class="saldo-section-header" onclick="toggleSaldoSec('${sec.id}')">
         <div style="display:flex;align-items:center;gap:10px">
