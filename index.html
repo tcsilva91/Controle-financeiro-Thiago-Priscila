@@ -1312,6 +1312,7 @@ function saveData() {
 
 // Carrega do localStorage imediatamente (sem travamento)
 let db = loadData();
+recalcularSaldosFluxo();
 
 // Em paralelo, tenta buscar versão mais recente do Supabase
 (async () => {
@@ -1323,6 +1324,7 @@ let db = loadData();
     if (!remote.compras) remote.compras = [];
     if (!remote.acoes) remote.acoes = db.acoes;
     db = remote;
+    recalcularSaldosFluxo();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
     renderSaldos();
     setSyncStatus('ok');
