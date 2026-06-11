@@ -366,6 +366,9 @@
   .fluxo-status-pendente{background:#f1f0ee;color:var(--slate);}
   .fluxo-edit-btn{background:none;border:none;cursor:pointer;font-size:.8rem;color:var(--slate-light);padding:2px 4px;border-radius:4px;}
   .fluxo-edit-btn:hover{background:var(--surface2);color:var(--text);}
+  .fluxo-edit-btn.check:hover{color:var(--green);}
+  .fluxo-edit-btn.del:hover{color:var(--red);}
+  .fluxo-btns{display:flex;flex-direction:column;align-items:center;gap:1px;}
   .fluxo-chart-container{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:16px;}
   .fluxo-summary-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px;}
 </style>
@@ -2291,6 +2294,7 @@ function renderCartoes(){
     'Fatura Pri Nu':'#9333ea',
     'Fatura Pri Itaú':'#276749',
     'Fatura Pri MP':'#5a6475',
+    'Valor Previsto':'#94a3b8',
   };
   function cartColorPrev(nome){
     if(CART_COLORS_PREV[nome]) return CART_COLORS_PREV[nome];
@@ -2313,10 +2317,16 @@ function renderCartoes(){
   if(tipoF==="avista")    comprasChart=comprasChart.filter(c=>c.npar<=1);
   if(tipoF==="parcelado") comprasChart=comprasChart.filter(c=>c.npar>1);
 
+  const NOME_PREVISTO = 'Valor Previsto';
+  const totalLimiteMensal = (db.limitesMensais||[]).reduce((a,l)=>a+(l.limite||0),0);
+
   const cartsPresentes=[...new Set(comprasChart.map(c=>c.cartao).filter(Boolean))];
+  // Adiciona cartão fictício apenas se não há filtro de cartão ou tipo
+  const mostrarPrevisto = !nomeF && !tipoF && totalLimiteMensal > 0;
+  const cartsGrafico = mostrarPrevisto ? [...cartsPresentes, NOME_PREVISTO] : cartsPresentes;
 
   const byChart={};
-  MESES_CHART.forEach(m=>{byChart[m]={};cartsPresentes.forEach(c=>{byChart[m][c]=0;});});
+  MESES_CHART.forEach(m=>{byChart[m]={};cartsGrafico.forEach(c=>{byChart[m][c]=0;});});
 
   comprasChart.forEach(c=>{
     if(!c.cartao||!c.comp||!c.valor) return;
@@ -2337,7 +2347,16 @@ function renderCartoes(){
     }
   });
 
-  const totalPorMes=MESES_CHART.map(m=>cartsPresentes.reduce((a,c)=>a+(byChart[m][c]||0),0));
+  // Preencher valor previsto em todos os meses: limite total - já lançado naquele mês
+  if(mostrarPrevisto){
+    MESES_CHART.forEach(m=>{
+      const jaLancado = cartsPresentes.reduce((a,c)=>a+(byChart[m][c]||0),0);
+      const previsto = Math.max(0, totalLimiteMensal - jaLancado);
+      byChart[m][NOME_PREVISTO] = previsto;
+    });
+  }
+
+  const totalPorMes=MESES_CHART.map(m=>cartsGrafico.reduce((a,c)=>a+(byChart[m][c]||0),0));
   const maxTotal=Math.max(...totalPorMes,1);
   const BAR_H=120;
 
@@ -2348,7 +2367,7 @@ function renderCartoes(){
     const tot=totalPorMes[k];
     const label=fmtMes(m);
     let stackParts=[];
-    cartsPresentes.forEach(cart=>{
+    cartsGrafico.forEach(cart=>{
       const v=byChart[m][cart]||0;
       if(v<=0) return;
       const h=Math.max(Math.round((v/maxTotal)*BAR_H),2);
@@ -2371,7 +2390,7 @@ function renderCartoes(){
     </div>`;
   }).join("");
 
-  const legendHtml=cartsPresentes.map((c,i)=>
+  const legendHtml=cartsGrafico.map((c,i)=>
     `<div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text2);font-weight:500"><div style="width:11px;height:11px;border-radius:2px;background:${cartColorPrev(c)};flex-shrink:0"></div>${c}</div>`
   ).join("");
 
@@ -2992,8 +3011,11 @@ function renderFluxo(){
             <span style="text-align:right;color:var(--slate)">${fmt(f.saldo)}</span>
             <span style="display:flex;align-items:center;gap:4px">
               <span class="fluxo-status-badge fluxo-status-${f.status}">${f.status}</span>
-              <button class="fluxo-edit-btn" onclick="editFluxo(${f.id})" title="Editar">✏️</button>
-              <button class="fluxo-edit-btn" onclick="excluirFluxo(${f.id})" title="Excluir" style="color:var(--red)">🗑</button>
+              <div class="fluxo-btns">
+                <button class="fluxo-edit-btn check" onclick="realizarFluxo(${f.id})" title="Marcar como realizado">✓</button>
+                <button class="fluxo-edit-btn" onclick="editFluxo(${f.id})" title="Editar">✏️</button>
+                <button class="fluxo-edit-btn del" onclick="excluirFluxo(${f.id})" title="Excluir">🗑</button>
+              </div>
             </span>
           </div>`).join('')}
       </div>
@@ -3026,6 +3048,15 @@ function editFluxo(id){
 function novoFluxo(mes){
   const hoje = new Date().toISOString().slice(0,10);
   openFluxoModal({id:null, desc:'', grupo:'', data:hoje, mes:mes||window._fluxoMesSel||'', valor:0, saldo:0, status:'previsto', obs:''});
+}
+
+function realizarFluxo(id){
+  const idx = db.fluxo.findIndex(f=>f.id===id);
+  if(idx===-1) return;
+  db.fluxo[idx].status = 'realizado';
+  recalcularSaldosFluxo();
+  saveData();
+  renderFluxo();
 }
 
 function excluirFluxo(id){
