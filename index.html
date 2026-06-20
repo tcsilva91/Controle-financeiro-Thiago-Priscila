@@ -418,6 +418,7 @@
           <button class="btn btn-outline btn-sm" id="saldo-toggle-all-btn" onclick="toggleAllSaldoSecs()" title="Recolher/expandir tudo">▲ Recolher tudo</button>
           <button class="btn btn-outline btn-sm" onclick="openModal('saldo')">+ Conta</button>
           <button class="btn btn-outline btn-sm" onclick="openModal('fatura')">+ Fatura</button>
+          <button class="btn btn-outline btn-sm" onclick="abrirModalAjusteSaldo()" title="Cria um lançamento de ajuste no Fluxo de Caixa com o saldo real do dia">🔄 Atualizar saldo</button>
         </div>
       </div>
       <!-- Seções expansíveis -->
@@ -989,7 +990,7 @@ const defaultData = {
     {"id": 76, "desc": "Fatura Pri Nu (12)", "grupo": "Cartão crédito", "data": "2026-07-19", "mes": "2026-07", "valor": 0, "saldo": 27098.25, "status": "pendente", "obs": ""},
     {"id": 77, "desc": "Faxina", "grupo": "Casa", "data": "2026-07-21", "mes": "2026-07", "valor": -250, "saldo": 26848.25, "status": "previsto", "obs": ""},
     {"id": 78, "desc": "São Luiz - Rede D'or", "grupo": "Salário Pri", "data": "2026-07-22", "mes": "2026-07", "valor": 0, "saldo": 26848.25, "status": "pendente", "obs": ""},
-    {"id": 79, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2026-07-28", "mes": "2026-07", "valor": -4239.44, "saldo": 22608.81, "status": "pendente", "obs": ""},
+    {"id": 79, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2026-08-10", "mes": "2026-08", "valor": -4239.44, "saldo": 48250.21, "status": "pendente", "obs": ""},
     {"id": 80, "desc": "Faxina", "grupo": "Casa", "data": "2026-07-28", "mes": "2026-07", "valor": -250, "saldo": 22358.81, "status": "previsto", "obs": ""},
     {"id": 81, "desc": "Pagamento Thiago 2/2", "grupo": "Salário Thi", "data": "2026-07-30", "mes": "2026-07", "valor": 3705, "saldo": 26063.81, "status": "previsto", "obs": ""},
     {"id": 82, "desc": "Anuidade CRM 5/5", "grupo": "Impostos", "data": "2026-07-30", "mes": "2026-07", "valor": -189.6, "saldo": 25874.21, "status": "previsto", "obs": ""},
@@ -1034,7 +1035,7 @@ const defaultData = {
     {"id": 120, "desc": "Fatura Pri Nu (12)", "grupo": "Cartão crédito", "data": "2026-08-19", "mes": "2026-08", "valor": 0, "saldo": -6042.28, "status": "pendente", "obs": ""},
     {"id": 121, "desc": "Faxina", "grupo": "Casa", "data": "2026-08-21", "mes": "2026-08", "valor": -250, "saldo": -6292.28, "status": "previsto", "obs": ""},
     {"id": 122, "desc": "São Luiz - Rede D'or", "grupo": "Salário Pri", "data": "2026-08-22", "mes": "2026-08", "valor": 0, "saldo": -6292.28, "status": "pendente", "obs": ""},
-    {"id": 123, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2026-08-28", "mes": "2026-08", "valor": -1231.54, "saldo": -7523.82, "status": "pendente", "obs": ""},
+    {"id": 123, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2026-09-10", "mes": "2026-09", "valor": -1231.54, "saldo": 25007.18, "status": "pendente", "obs": ""},
     {"id": 124, "desc": "Faxina", "grupo": "Casa", "data": "2026-08-28", "mes": "2026-08", "valor": -250, "saldo": -7773.82, "status": "previsto", "obs": ""},
     {"id": 125, "desc": "Pagamento Thiago 2/2", "grupo": "Salário Thi", "data": "2026-08-30", "mes": "2026-08", "valor": 3705, "saldo": -4068.82, "status": "previsto", "obs": ""},
     {"id": 126, "desc": "Reembolso Trabalho", "grupo": "Viagem Trabalho", "data": "2026-08-30", "mes": "2026-08", "valor": 4040, "saldo": -28.82, "status": "previsto", "obs": "Reembolso empresa"},
@@ -1063,7 +1064,7 @@ const defaultData = {
     {"id": 149, "desc": "Fatura Pri Nu (12)", "grupo": "Cartão crédito", "data": "2026-09-19", "mes": "2026-09", "valor": 0, "saldo": 16960.51, "status": "pendente", "obs": ""},
     {"id": 150, "desc": "Faxina", "grupo": "Casa", "data": "2026-09-21", "mes": "2026-09", "valor": -250, "saldo": 16710.51, "status": "previsto", "obs": ""},
     {"id": 151, "desc": "São Luiz - Rede D'or", "grupo": "Salário Pri", "data": "2026-09-22", "mes": "2026-09", "valor": 0, "saldo": 16710.51, "status": "pendente", "obs": ""},
-    {"id": 152, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2026-09-28", "mes": "2026-09", "valor": -597.69, "saldo": 16112.82, "status": "pendente", "obs": ""},
+    {"id": 152, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2026-10-10", "mes": "2026-10", "valor": -597.69, "saldo": 27938.82, "status": "pendente", "obs": ""},
     {"id": 153, "desc": "Faxina", "grupo": "Casa", "data": "2026-09-28", "mes": "2026-09", "valor": -250, "saldo": 15862.82, "status": "previsto", "obs": ""},
     {"id": 154, "desc": "Pagamento Thiago 2/2", "grupo": "Salário Thi", "data": "2026-09-30", "mes": "2026-09", "valor": 500, "saldo": 16362.82, "status": "previsto", "obs": ""},
     {"id": 155, "desc": "Reembolso Trabalho", "grupo": "Viagem Trabalho", "data": "2026-09-30", "mes": "2026-09", "valor": 4040, "saldo": 20402.82, "status": "previsto", "obs": "Reembolso empresa"},
@@ -1091,7 +1092,7 @@ const defaultData = {
     {"id": 177, "desc": "Fatura Pri Nu (12)", "grupo": "Cartão crédito", "data": "2026-10-19", "mes": "2026-10", "valor": 0, "saldo": 15174.58, "status": "pendente", "obs": ""},
     {"id": 178, "desc": "Faxina", "grupo": "Casa", "data": "2026-10-21", "mes": "2026-10", "valor": -250, "saldo": 14924.58, "status": "previsto", "obs": ""},
     {"id": 179, "desc": "São Luiz - Rede D'or", "grupo": "Salário Pri", "data": "2026-10-22", "mes": "2026-10", "valor": 0, "saldo": 14924.58, "status": "pendente", "obs": ""},
-    {"id": 180, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2026-10-28", "mes": "2026-10", "valor": -174.63, "saldo": 14749.95, "status": "pendente", "obs": ""},
+    {"id": 180, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2026-11-10", "mes": "2026-11", "valor": -174.63, "saldo": 38580.95, "status": "pendente", "obs": ""},
     {"id": 181, "desc": "Faxina", "grupo": "Casa", "data": "2026-10-28", "mes": "2026-10", "valor": -250, "saldo": 14499.95, "status": "previsto", "obs": ""},
     {"id": 182, "desc": "Pagamento Thiago 2/2", "grupo": "Salário Thi", "data": "2026-10-30", "mes": "2026-10", "valor": 3705, "saldo": 18204.95, "status": "previsto", "obs": ""},
     {"id": 183, "desc": "Reembolso Trabalho", "grupo": "Viagem Trabalho", "data": "2026-10-30", "mes": "2026-10", "valor": 4040, "saldo": 22244.95, "status": "previsto", "obs": "Reembolso empresa"},
@@ -1119,7 +1120,7 @@ const defaultData = {
     {"id": 205, "desc": "Fatura Pri Nu (12)", "grupo": "Cartão crédito", "data": "2026-11-19", "mes": "2026-11", "valor": 0, "saldo": 25848.43, "status": "pendente", "obs": ""},
     {"id": 206, "desc": "Faxina", "grupo": "Casa", "data": "2026-11-21", "mes": "2026-11", "valor": -250, "saldo": 25598.43, "status": "previsto", "obs": ""},
     {"id": 207, "desc": "São Luiz - Rede D'or", "grupo": "Salário Pri", "data": "2026-11-22", "mes": "2026-11", "valor": 0, "saldo": 25598.43, "status": "pendente", "obs": ""},
-    {"id": 208, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2026-11-28", "mes": "2026-11", "valor": -62.54, "saldo": 25535.89, "status": "pendente", "obs": ""},
+    {"id": 208, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2026-12-10", "mes": "2026-12", "valor": -62.54, "saldo": 49366.89, "status": "pendente", "obs": ""},
     {"id": 209, "desc": "Faxina", "grupo": "Casa", "data": "2026-11-28", "mes": "2026-11", "valor": -250, "saldo": 25285.89, "status": "previsto", "obs": ""},
     {"id": 210, "desc": "Pagamento Thiago 2/2", "grupo": "Salário Thi", "data": "2026-11-30", "mes": "2026-11", "valor": 3705, "saldo": 28990.89, "status": "previsto", "obs": ""},
     {"id": 211, "desc": "Reembolso Trabalho", "grupo": "Viagem Trabalho", "data": "2026-11-30", "mes": "2026-11", "valor": 4040, "saldo": 33030.89, "status": "previsto", "obs": "Reembolso empresa"},
@@ -1147,7 +1148,7 @@ const defaultData = {
     {"id": 233, "desc": "Fatura Pri Nu (12)", "grupo": "Cartão crédito", "data": "2026-12-19", "mes": "2026-12", "valor": 0, "saldo": 39279.88, "status": "pendente", "obs": ""},
     {"id": 234, "desc": "Faxina", "grupo": "Casa", "data": "2026-12-21", "mes": "2026-12", "valor": -250, "saldo": 39029.88, "status": "previsto", "obs": ""},
     {"id": 235, "desc": "São Luiz - Rede D'or", "grupo": "Salário Pri", "data": "2026-12-22", "mes": "2026-12", "valor": 0, "saldo": 39029.88, "status": "pendente", "obs": ""},
-    {"id": 236, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2026-12-28", "mes": "2026-12", "valor": -62.54, "saldo": 38967.34, "status": "pendente", "obs": ""},
+    {"id": 236, "desc": "Fatura Pri Itaú", "grupo": "Cartão crédito", "data": "2027-01-10", "mes": "2027-01", "valor": -62.54, "saldo": 81962.34, "status": "pendente", "obs": ""},
     {"id": 237, "desc": "Faxina", "grupo": "Casa", "data": "2026-12-28", "mes": "2026-12", "valor": -250, "saldo": 38717.34, "status": "previsto", "obs": ""},
     {"id": 238, "desc": "Pagamento Thiago 2/2", "grupo": "Salário Thi", "data": "2026-12-30", "mes": "2026-12", "valor": 3705, "saldo": 42422.34, "status": "previsto", "obs": ""},
     {"id": 239, "desc": "Reembolso Trabalho", "grupo": "Viagem Trabalho", "data": "2026-12-30", "mes": "2026-12", "valor": 4040, "saldo": 46462.34, "status": "previsto", "obs": "Reembolso empresa"},
@@ -3081,7 +3082,7 @@ function openFluxoModal(f){
         <div class="field"><label>Descrição</label><input id="fm-desc" value="${f.desc}" style="width:100%"></div>
         <div class="field"><label>Grupo</label>
           <select id="fm-grupo" style="width:100%">
-            ${(window.CATEGORIAS||['Casamento','Lua de Mel','Casa','Família','Saúde','Transporte','Mercado','Investimento','Salário Thi','Salário Pri','Cartão crédito','Viagem Trabalho','A definir']).map(g=>`<option${g===f.grupo?' selected':''}>${g}</option>`).join('')}
+            ${(window.CATEGORIAS||['Casamento','Lua de Mel','Casa','Família','Saúde','Transporte','Mercado','Investimento','Salário Thi','Salário Pri','Cartão crédito','Viagem Trabalho','Ajuste de Saldo','A definir']).map(g=>`<option${g===f.grupo?' selected':''}>${g}</option>`).join('')}
           </select>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -3134,6 +3135,64 @@ function salvarFluxo(id){
   saveData();
   closeFluxoModal();
   renderFluxo();
+}
+
+// ── AJUSTE MANUAL DE SALDO (reinício do controle do Fluxo de Caixa) ──────
+function abrirModalAjusteSaldo(){
+  const hoje = new Date().toISOString().slice(0,10);
+  let m = document.getElementById('ajuste-saldo-modal');
+  if(!m){ m=document.createElement('div'); m.id='ajuste-saldo-modal'; document.body.appendChild(m); }
+  m.innerHTML = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center">
+      <div onclick="event.stopPropagation()" style="background:var(--surface);border-radius:var(--radius);padding:24px;width:380px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,.18)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="margin:0;font-size:1rem;font-weight:600">🔄 Atualizar saldo do Fluxo de Caixa</h3>
+          <button onclick="closeAjusteSaldoModal()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--slate)">✕</button>
+        </div>
+        <p style="font-size:.78rem;color:var(--slate);margin:0 0 14px;line-height:1.4">Informe a data e o saldo total real das contas nesse dia. Será criado um lançamento de ajuste no Fluxo de Caixa nessa data — os lançamentos existentes não são alterados, e a projeção segue normalmente a partir desse novo valor.</p>
+        <div class="field"><label>Data</label><input id="as-data" type="date" value="${hoje}" style="width:100%"></div>
+        <div class="field"><label>Saldo total nesse dia (R$)</label><input id="as-saldo" type="number" step="0.01" placeholder="0,00" style="width:100%"></div>
+        <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+          <button class="btn btn-outline btn-sm" onclick="closeAjusteSaldoModal()">Cancelar</button>
+          <button class="btn btn-primary btn-sm" onclick="salvarAjusteSaldoFluxo()">Salvar</button>
+        </div>
+      </div>
+    </div>`;
+  m.style.display='block';
+  document.getElementById('as-saldo').focus();
+}
+
+function closeAjusteSaldoModal(){
+  const m=document.getElementById('ajuste-saldo-modal');
+  if(m) m.style.display='none';
+}
+
+function salvarAjusteSaldoFluxo(){
+  const data = document.getElementById('as-data').value;
+  const saldoInformado = parseFloat(document.getElementById('as-saldo').value);
+  if(!data){ alert('Informe a data.'); return; }
+  if(isNaN(saldoInformado)){ alert('Informe o saldo total do dia.'); return; }
+
+  const mes = data.slice(0,7);
+  const newId = Math.max(0,...db.fluxo.map(f=>f.id))+1;
+
+  // 1) Insere o lançamento com valor 0 só para descobrir o saldo já projetado nesse ponto da linha do tempo
+  const novo = {id:newId, desc:'Ajuste de saldo', grupo:'Ajuste de Saldo', data, mes, valor:0, saldo:0, status:'realizado', obs:'Atualização manual de saldo — reinício do controle'};
+  db.fluxo.push(novo);
+  recalcularSaldosFluxo();
+
+  // 2) Calcula a diferença entre o saldo informado e o saldo projetado antes do ajuste
+  const saldoAntes = novo.saldo;
+  novo.valor = Math.round((saldoInformado - saldoAntes)*100)/100;
+  novo.saldo = saldoInformado;
+
+  // 3) Recalcula em cascata a partir daqui, sem tocar nos lançamentos anteriores
+  recalcularSaldosFluxo();
+
+  saveData();
+  closeAjusteSaldoModal();
+  renderFluxo();
+  renderSaldos();
 }
 
 function recalcularSaldosFluxo(){
