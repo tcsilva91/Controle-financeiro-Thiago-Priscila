@@ -421,6 +421,8 @@
           <button class="btn btn-outline btn-sm" onclick="abrirModalAjusteSaldo()" title="Cria um lançamento de ajuste no Fluxo de Caixa com o saldo real do dia">🔄 Atualizar saldo</button>
         </div>
       </div>
+      <!-- Resumo do saldo de controle (Contas + Reserva Casamento) -->
+      <div id="saldo-resumo-controle"></div>
       <!-- Seções expansíveis -->
       <div id="saldo-sections"></div>
     </div>
@@ -1590,6 +1592,20 @@ function renderSaldos(){
   const totalFaturas = fatAbert.reduce((a,f)=>a+f.valor,0);
   const saldoLiq     = totalContas + totalInvest + totalCasinha - totalFaturas;
 
+  // Saldo de controle do Fluxo de Caixa: Contas Correntes + Reserva Casamento (sem investimentos, sem deduzir faturas)
+  const saldoControle = totalContas + totalCasinha;
+  window._saldoControle = saldoControle;
+  const resumoEl = document.getElementById('saldo-resumo-controle');
+  if(resumoEl){
+    resumoEl.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;margin-bottom:16px">
+      <div>
+        <div style="font-size:.78rem;color:var(--slate);font-weight:600">💰 Saldo de controle (Contas Correntes + Reserva Casamento)</div>
+        <div style="font-size:.7rem;color:var(--slate-light);margin-top:2px">Referência usada no Fluxo de Caixa — não inclui Investimentos nem desconta Faturas em aberto</div>
+      </div>
+      <div style="font-size:1.15rem;font-weight:700;color:var(--text)">${fmt(saldoControle)}</div>
+    </div>`;
+  }
+
   // ── Seções expansíveis ──
   const saldoCardHtml = (s) => {
     const fats = db.faturas.filter(f=>f.cartao===s.nome&&f.status!=='paga');
@@ -2731,7 +2747,10 @@ function editParcela(id){openModal('parcela',id);}
 function editCartao(id){openModal('cartao',id);}
 function editReceita(id){openModal('receita',id);}
 
-document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  if(o.id==='modal-saldo' || o.id==='modal-fatura') return; // fecha só via X ou Cancelar
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
+});
 
 // EXPORT / IMPORT
 function exportData(){
@@ -3151,7 +3170,8 @@ function abrirModalAjusteSaldo(){
         </div>
         <p style="font-size:.78rem;color:var(--slate);margin:0 0 14px;line-height:1.4">Informe a data e o saldo total real das contas nesse dia. Será criado um lançamento de ajuste no Fluxo de Caixa nessa data — os lançamentos existentes não são alterados, e a projeção segue normalmente a partir desse novo valor.</p>
         <div class="field"><label>Data</label><input id="as-data" type="date" value="${hoje}" style="width:100%"></div>
-        <div class="field"><label>Saldo total nesse dia (R$)</label><input id="as-saldo" type="number" step="0.01" placeholder="0,00" style="width:100%"></div>
+        <div class="field"><label>Saldo total nesse dia (R$)</label><input id="as-saldo" type="number" step="0.01" placeholder="0,00" value="${(window._saldoControle!==undefined&&window._saldoControle!==null)?window._saldoControle:''}" style="width:100%"></div>
+        <p style="font-size:.72rem;color:var(--slate-light);margin:6px 0 0">Pré-preenchido com Contas Correntes + Reserva Casamento. Ajuste se necessário.</p>
         <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
           <button class="btn btn-outline btn-sm" onclick="closeAjusteSaldoModal()">Cancelar</button>
           <button class="btn btn-primary btn-sm" onclick="salvarAjusteSaldoFluxo()">Salvar</button>
