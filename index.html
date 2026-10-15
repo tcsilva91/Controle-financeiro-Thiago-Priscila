@@ -1295,8 +1295,7 @@ function loadData() {
       if (!d.fluxo) d.fluxo = JSON.parse(JSON.stringify(defaultData.fluxo));
       // Garantir que novos itens do defaultData sejam incluídos se não existirem
       else {
-        const idsExist = new Set(d.fluxo.map(f=>f.id));
-        defaultData.fluxo.forEach(f=>{ if(!idsExist.has(f.id)) d.fluxo.push(f); });
+        // R11: não re-insere lançamentos do defaultData — itens excluídos pelo usuário ficavam "ressuscitando"
         const idsLim = new Set((d.limitesMensais||[]).map(l=>l.cat));
         if(!d.limitesMensais) d.limitesMensais = JSON.parse(JSON.stringify(defaultData.limitesMensais));
         else defaultData.limitesMensais.forEach(l=>{ if(!idsLim.has(l.cat)) d.limitesMensais.push(l); });
@@ -1580,6 +1579,14 @@ function renderDashboard(){
 //  SALDOS
 // ============================================================
 function fmtK(v){if(!v||v===0)return"–";if(v>=1000)return"R$ "+(v/1000).toFixed(1).replace(".",",")+"k";return"R$ "+Math.round(v);}
+function calcSaldoControle(){
+  const contas  = db.saldos.filter(s=>s.cat==='conta');
+  const casinha = db.saldos.filter(s=>s.cat==='invest'&&(s.obs||'').toLowerCase().includes('casamento'));
+  const totalContas  = contas.reduce((a,s)=>a+Number(s.valor||0),0);
+  const totalCasinha = casinha.reduce((a,s)=>a+Number(s.valor||0),0);
+  return Math.round((totalContas+totalCasinha)*100)/100;
+}
+
 function renderSaldos(){
   const contas   = db.saldos.filter(s=>s.cat==='conta');
   const casinha  = db.saldos.filter(s=>s.cat==='invest'&&(s.obs||'').toLowerCase().includes('casamento'));
@@ -1593,7 +1600,7 @@ function renderSaldos(){
   const saldoLiq     = totalContas + totalInvest + totalCasinha - totalFaturas;
 
   // Saldo de controle do Fluxo de Caixa: Contas Correntes + Reserva Casamento (sem investimentos, sem deduzir faturas)
-  const saldoControle = totalContas + totalCasinha;
+  const saldoControle = calcSaldoControle();
   window._saldoControle = saldoControle;
   const resumoEl = document.getElementById('saldo-resumo-controle');
   if(resumoEl){
@@ -3159,6 +3166,7 @@ function salvarFluxo(id){
 // ── AJUSTE MANUAL DE SALDO (reinício do controle do Fluxo de Caixa) ──────
 function abrirModalAjusteSaldo(){
   const hoje = new Date().toISOString().slice(0,10);
+  const saldoPreenchido = calcSaldoControle();
   let m = document.getElementById('ajuste-saldo-modal');
   if(!m){ m=document.createElement('div'); m.id='ajuste-saldo-modal'; document.body.appendChild(m); }
   m.innerHTML = `
@@ -3170,7 +3178,7 @@ function abrirModalAjusteSaldo(){
         </div>
         <p style="font-size:.78rem;color:var(--slate);margin:0 0 14px;line-height:1.4">Informe a data e o saldo total real das contas nesse dia. Será criado um lançamento de ajuste no Fluxo de Caixa nessa data — os lançamentos existentes não são alterados, e a projeção segue normalmente a partir desse novo valor.</p>
         <div class="field"><label>Data</label><input id="as-data" type="date" value="${hoje}" style="width:100%"></div>
-        <div class="field"><label>Saldo total nesse dia (R$)</label><input id="as-saldo" type="number" step="0.01" placeholder="0,00" value="${(window._saldoControle!==undefined&&window._saldoControle!==null)?window._saldoControle:''}" style="width:100%"></div>
+        <div class="field"><label>Saldo total nesse dia (R$)</label><input id="as-saldo" type="number" step="0.01" placeholder="0,00" value="${saldoPreenchido}" style="width:100%"></div>
         <p style="font-size:.72rem;color:var(--slate-light);margin:6px 0 0">Pré-preenchido com Contas Correntes + Reserva Casamento. Ajuste se necessário.</p>
         <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
           <button class="btn btn-outline btn-sm" onclick="closeAjusteSaldoModal()">Cancelar</button>
@@ -3180,6 +3188,7 @@ function abrirModalAjusteSaldo(){
     </div>`;
   m.style.display='block';
   document.getElementById('as-saldo').focus();
+  document.getElementById('as-saldo').select();
 }
 
 function closeAjusteSaldoModal(){
