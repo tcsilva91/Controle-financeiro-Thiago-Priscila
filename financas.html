@@ -424,7 +424,6 @@
         <div style="display:flex;gap:8px">
           <button class="btn btn-outline btn-sm" id="saldo-toggle-all-btn" onclick="toggleAllSaldoSecs()" title="Recolher/expandir tudo">▲ Recolher tudo</button>
           <button class="btn btn-outline btn-sm" onclick="openModal('saldo')">+ Conta</button>
-          <button class="btn btn-outline btn-sm" onclick="openModal('fatura')">+ Fatura</button>
           <button class="btn btn-outline btn-sm" onclick="abrirModalAjusteSaldo()" title="Cria um lançamento de ajuste no Fluxo de Caixa com o saldo real do dia">🔄 Atualizar saldo</button>
         </div>
       </div>
@@ -1608,16 +1607,87 @@ function calcSaldoControle(){
   return Math.round((totalContas+totalCasinha)*100)/100;
 }
 
+// ── FATURAS: próxima fatura em aberto de cada cartão, a partir do Fluxo de Caixa ──
+const nomeCartaoFluxo = d => (d||'').replace(/\s*\(\d+\)\s*$/,'').trim();
+function proximasFaturasFluxo(){
+  const out=[];
+  (db.cartoes||[]).forEach(c=>{
+    const abertas=(db.fluxo||[])
+      .filter(f=>f.grupo==='Cartão crédito' && f.status!=='realizado' && f.data && nomeCartaoFluxo(f.desc)===c.nome)
+      .sort((a,b)=>a.data.localeCompare(b.data)||a.id-b.id);
+    if(!abertas.length) return;
+    const f=abertas[0], p=abertas[1];
+    out.push({id:f.id, cartao:c.nome, mes:f.mes||f.data.slice(0,7), data:f.data, valor:Math.round(-f.valor*100)/100||0, obs:f.obs||'',
+      prox:p?{mes:p.mes||p.data.slice(0,7), valor:Math.round(-p.valor*100)/100||0}:null});
+  });
+  return out;
+}
+
+// ── INVESTIMENTOS: lidos do painel Casa | Investimentos (inv_ativos + posição mais recente) ──
+// Só exibição: não entram no saldo de controle nem no Fluxo de Caixa.
+window._inv = {estado:'carregando', itens:[], total:0, dataRef:''};
+async function carregarInvestimentosPainel(){
+  try{
+    const r = await Promise.all([
+      sbClient.from('inv_ativos').select('*').eq('ativo', true),
+      sbClient.from('inv_posicoes').select('ativo_id,data_ref,valor'),
+      sbClient.from('inv_titulares').select('id,nome'),
+      sbClient.from('inv_instituicoes').select('id,nome'),
+      sbClient.from('inv_metas').select('id,nome'),
+    ]);
+    const e=r.find(x=>x.error); if(e) throw e.error;
+    const [ativos,pos,tits,insts,metas]=r.map(x=>x.data||[]);
+    const ult={};
+    pos.forEach(p=>{ if(!ult[p.ativo_id]||p.data_ref>ult[p.ativo_id].data_ref) ult[p.ativo_id]=p; });
+    const nome=(arr,id)=>(arr.find(x=>x.id===id)||{}).nome||'—';
+    const itens=ativos.map(a=>{const p=ult[a.id]; return {id:a.id, nome:a.nome, classe:a.classe||'', titular:nome(tits,a.titular_id),
+      instituicao:nome(insts,a.instituicao_id), meta:a.meta_id?nome(metas,a.meta_id):'', valor:p?Number(p.valor)||0:0, data:p?p.data_ref:''};})
+      .filter(x=>x.valor>0).sort((a,b)=>b.valor-a.valor);
+    const total=Math.round(itens.reduce((a,x)=>a+x.valor,0)*100)/100;
+    const dataRef=itens.reduce((m,x)=>x.data>m?x.data:m,'');
+    window._inv={estado:'ok', itens, total, dataRef};
+  }catch(err){
+    console.warn('Investimentos (painel) erro:',err);
+    window._inv={estado:'erro', itens:[], total:0, dataRef:''};
+  }
+  if(document.getElementById('tab-saldos')?.classList.contains('active')) renderSaldos();
+}
+function invDadosSaldos(){ return window._inv; }
+function renderInvestSaldos(){
+  const v=window._inv;
+  const link=`<a href="investimentos.html" class="btn btn-outline btn-sm" style="text-decoration:none">📈 Abrir painel de investimentos</a>`;
+  if(v.estado==='carregando') return `<div style="font-size:.8rem;color:var(--slate)">Carregando do painel de investimentos…</div>`;
+  if(v.estado==='erro') return `<div style="font-size:.8rem;color:var(--red)">Não consegui ler o painel de investimentos. <button class="btn btn-outline btn-sm" onclick="window._inv.estado='carregando';renderSaldos();carregarInvestimentosPainel()">Tentar de novo</button> ${link}</div>`;
+  if(!v.itens.length) return `<div style="font-size:.8rem;color:var(--slate)">Nenhum investimento ativo no painel. ${link}</div>`;
+  // Agrupa por titular + instituição
+  const grupos={};
+  v.itens.forEach(x=>{const k=x.titular+' · '+x.instituicao; (grupos[k]=grupos[k]||[]).push(x);});
+  const cards=Object.entries(grupos).sort((a,b)=>b[1].reduce((s,x)=>s+x.valor,0)-a[1].reduce((s,x)=>s+x.valor,0)).map(([k,arr])=>{
+    const tot=arr.reduce((s,x)=>s+x.valor,0);
+    return `<div class="saldo-card">
+      <div class="saldo-card-header"><div class="saldo-card-nome">${arr[0].instituicao}</div><span class="saldo-card-titular">${arr[0].titular}</span></div>
+      <div class="saldo-card-valor">${fmt(tot)}</div>
+      <div class="saldo-card-data">${arr.length} investimento${arr.length!==1?'s':''}</div>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:3px">
+        ${arr.map(x=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:.72rem;color:var(--text2)">
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${x.nome}${x.classe?' · '+x.classe:''}">${x.nome}${x.meta?` <span class="badge badge-purple" style="font-size:.58rem">${x.meta}</span>`:''}</span>
+          <strong style="flex-shrink:0">${fmt(x.valor)}</strong></div>`).join('')}
+      </div>
+    </div>`;}).join('');
+  return cards+`<div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:.7rem;color:var(--slate-light)">
+    <span>Posição mais recente de cada investimento (até ${fmtDate(v.dataRef)}). Não entra no saldo de controle nem no Fluxo.</span>${link}</div>`;
+}
+
 function renderSaldos(){
   const contas   = db.saldos.filter(s=>s.cat==='conta');
   const casinha  = db.saldos.filter(s=>s.cat==='invest'&&(s.obs||'').toLowerCase().includes('casamento'));
-  const invest   = db.saldos.filter(s=>s.cat==='invest'&&!(s.obs||'').toLowerCase().includes('casamento'));
-  const fatAbert = db.faturas.filter(f=>f.status!=='paga');
+  const inv      = invDadosSaldos();           // lido do painel Casa | Investimentos
+  const fatProx  = proximasFaturasFluxo();     // próxima fatura em aberto de cada cartão, lida do Fluxo
 
   const totalContas  = contas.reduce((a,s)=>a+s.valor,0);
-  const totalInvest  = invest.reduce((a,s)=>a+s.valor,0);
+  const totalInvest  = inv.total;
   const totalCasinha = casinha.reduce((a,s)=>a+s.valor,0);
-  const totalFaturas = fatAbert.reduce((a,f)=>a+f.valor,0);
+  const totalFaturas = fatProx.reduce((a,f)=>a+f.valor,0);
   const saldoLiq     = totalContas + totalInvest + totalCasinha - totalFaturas;
 
   // Saldo de controle do Fluxo de Caixa: Contas Correntes + Reserva Casamento (sem investimentos, sem deduzir faturas)
@@ -1652,41 +1722,23 @@ function renderSaldos(){
 
   const sections = [
     {id:'sec-contas',  title:'💰 Contas Correntes',  total:totalContas,  items:contas,   color:'var(--blue)',  renderFn: ()=>contas.map(saldoCardHtml).join('')},
-    {id:'sec-invest',  title:'📈 Investimentos',      total:totalInvest,  items:invest,   color:'var(--green)', renderFn: ()=>invest.map(saldoCardHtml).join('')},
+    {id:'sec-invest',  title:'📈 Investimentos',      total:totalInvest,  items:inv.itens, color:'var(--green)', renderFn: renderInvestSaldos},
     {id:'sec-casinha', title:'💍 Reserva Casamento',  total:totalCasinha, items:casinha,  color:'var(--amber)', renderFn: ()=>casinha.map(saldoCardHtml).join('')},
-    {id:'sec-faturas', title:'🧾 Faturas',  total:totalFaturas, items:fatAbert, color:'var(--red)',   renderFn: ()=>{
-      // Por cartão: mostrar fatura atual + próxima fatura já registrada
-      const cartoesUniq = [...new Set(db.faturas.map(f=>f.cartao))];
-      return cartoesUniq.map(cart=>{
-        const fats = [...db.faturas.filter(f=>f.cartao===cart)].sort((a,b)=>b.mes.localeCompare(a.mes));
-        const ultima = fats[0];
-        if(!ultima) return '';
-
-        // Próxima fatura: segunda mais recente se a última estiver paga, 
-        // ou buscar uma fatura futura já registrada
-        const proxFatura = fats.length > 1 && fats[1].status !== 'paga' ? fats[1] : null;
-        // Se última está em aberto, próxima é a que vem depois dela
-        const faturaAberta = fats.find(f => f.status !== 'paga');
-        const faturaProx   = fats.find(f => f.status !== 'paga' && f.mes > (faturaAberta?.mes||''));
-
-        const isAberta = ultima.status !== 'paga';
-        const borderColor = isAberta ? 'var(--red)' : 'var(--green)';
-        const valorColor  = isAberta ? 'var(--red)' : 'var(--green)';
-        return `<div class="saldo-card" style="border-left:3px solid ${borderColor}">
-          <button class="saldo-card-edit btn btn-outline btn-sm" onclick="editFatura(${ultima.id})">✏️</button>
+    {id:'sec-faturas', title:'🧾 Faturas',  total:totalFaturas, items:fatProx, color:'var(--red)',   renderFn: ()=>{
+      if(!fatProx.length) return `<div style="font-size:.8rem;color:var(--slate)">Nenhuma fatura em aberto no Fluxo de Caixa.</div>`;
+      return fatProx.map(f=>`<div class="saldo-card" style="border-left:3px solid var(--red)">
+          <button class="saldo-card-edit btn btn-outline btn-sm" onclick="editFluxo(${f.id})" title="Editar no Fluxo de Caixa">✏️</button>
           <div class="saldo-card-header">
-            <div><div class="saldo-card-nome">${ultima.cartao}</div><div style="font-size:.72rem;color:var(--slate)">Ref: ${ultima.mes}</div></div>
-            ${statusBadge(ultima.status)}
+            <div><div class="saldo-card-nome">${f.cartao}</div><div style="font-size:.72rem;color:var(--slate)">Ref: ${fmtMes(f.mes)}</div></div>
+            ${statusBadge('em aberto')}
           </div>
-          <div class="saldo-card-valor" style="color:${valorColor}">${fmt(ultima.valor)}</div>
-          <div class="saldo-card-data">Vence ${fmtDate(ultima.venc)}</div>
-          ${ultima.obs?`<div style="font-size:.72rem;color:var(--slate);margin-top:6px">${ultima.obs}</div>`:''}
-          ${faturaProx?`<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);font-size:.72rem;color:var(--slate)">
-            📅 Próxima <strong>${faturaProx.mes}</strong>: <span style="color:var(--text2);font-weight:600">${fmt(faturaProx.valor)}</span>
-            <span style="margin-left:4px">${statusBadge(faturaProx.status)}</span>
+          <div class="saldo-card-valor" style="color:${f.valor>0?'var(--red)':'var(--slate-light)'}">${fmt(f.valor)}</div>
+          <div class="saldo-card-data">Vence ${fmtDate(f.data)}${f.valor===0?' · sem valor no Fluxo':''}</div>
+          ${f.obs?`<div style="font-size:.72rem;color:var(--slate);margin-top:6px">${f.obs}</div>`:''}
+          ${f.prox?`<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);font-size:.72rem;color:var(--slate)">
+            📅 Seguinte <strong>${fmtMes(f.prox.mes)}</strong>: <span style="color:var(--text2);font-weight:600">${fmt(f.prox.valor)}</span>
           </div>`:''}
-        </div>`;
-      }).join('');
+        </div>`).join('') + `<div style="grid-column:1/-1;font-size:.7rem;color:var(--slate-light)">Valores lidos do Fluxo de Caixa (lançamentos "Fatura …" ainda não realizados). Para mudar um valor, edite no Fluxo.</div>`;
     }},
   ];
 
@@ -2946,6 +2998,7 @@ function renderPendenciasPix(){
 
 // INIT
 renderSaldos();
+carregarInvestimentosPainel();
 
 // ── FLUXO DE CAIXA ──────────────────────────────────────────
 function round2(v){return Math.round(v*100)/100;}
@@ -3182,6 +3235,7 @@ function salvarFluxo(id){
   saveData();
   closeFluxoModal();
   renderFluxo();
+  renderSaldos();
 }
 
 // ── AJUSTE MANUAL DE SALDO (reinício do controle do Fluxo de Caixa) ──────
