@@ -130,19 +130,6 @@ dialog h2{font-size:1rem;margin-bottom:12px}
 </head>
 <body>
 
-<div id="login" class="hide">
-  <div class="card">
-    <h1>Thiago &amp; Priscila</h1>
-    <div class="sub">📈 Investimentos</div>
-    <form id="fLogin">
-      <label>E-mail<input type="email" name="email" required autocomplete="username"></label>
-      <label>Senha<input type="password" name="senha" required autocomplete="current-password"></label>
-      <button class="btn" style="width:100%;margin-top:6px">Entrar</button>
-      <p id="loginMsg" class="msg"></p>
-    </form>
-  </div>
-</div>
-
 <div id="app" class="hide">
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo"><h1>Thiago &amp; Priscila</h1><span>📈 Investimentos</span></div>
@@ -153,7 +140,8 @@ dialog h2{font-size:1rem;margin-bottom:12px}
     <button class="nav-item" data-tab="exportar"><span class="icon">⬇</span> Exportar</button>
   </nav>
   <div class="sidebar-footer">
-    <a class="nav-item" href="index.html"><span class="icon">↩</span> Controle Financeiro</a>
+    <a class="nav-item" href="index.html"><span class="icon">🏠</span> Início</a>
+    <a class="nav-item" href="financas.html"><span class="icon">💰</span> Controle Financeiro</a>
     <button class="nav-item" id="bSair"><span class="icon">⎋</span> Sair</button>
     <div class="sync-info" id="uNome"></div>
   </div>
@@ -237,20 +225,10 @@ function toast(m, err){ const t=$('toast'); t.textContent=m; t.className=err?'er
 const erro = m => { toast(m,true); return false; };
 
 /* ============ AUTENTICAÇÃO ============ */
-function showLogin(msg){ $('app').classList.add('hide'); $('login').classList.remove('hide'); $('loginMsg').textContent = msg||''; }
+// O login fica na página inicial; sem sessão, volta para lá
+function showLogin(msg){ location.replace('index.html' + (msg ? '?msg=' + encodeURIComponent(msg) : '')); }
 
-$('fLogin').onsubmit = async e => {
-  e.preventDefault();
-  if(!configOk) return showLogin('Preencha SUPABASE_URL e SUPABASE_ANON_KEY no início do arquivo.');
-  const fd = new FormData(e.target), b = e.target.querySelector('button');
-  b.disabled = true; $('loginMsg').textContent = '';
-  const {data, error} = await sb.auth.signInWithPassword({email:fd.get('email'), password:fd.get('senha')});
-  b.disabled = false;
-  if(error) return showLogin('E-mail ou senha inválidos.');
-  await entrar(data.user);
-};
-
-$('bSair').onclick = async () => { await sb.auth.signOut(); showLogin(); };
+$('bSair').onclick = async () => { try{ await sb.auth.signOut(); }catch(e){} try{ localStorage.removeItem('tp-financas-v2'); }catch(e){} showLogin(); };
 
 async function entrar(user){
   S.user = user;
@@ -258,7 +236,7 @@ async function entrar(user){
   if(error || !data){ await sb.auth.signOut(); return showLogin('Este login não está autorizado. Peça para cadastrá-lo como membro.'); }
   S.membro = data;
   $('uNome').textContent = 'Conectado como ' + data.nome;
-  $('login').classList.add('hide'); $('app').classList.remove('hide');
+  $('app').classList.remove('hide');
   await carregar();
 }
 
